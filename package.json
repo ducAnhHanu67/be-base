@@ -1,0 +1,13 @@
+{
+  "name": "be-heybook",
+  "type": "module",
+  "version": "1.0.0",
+  "description": "Backend API for an online store selling books and stationery",
+  "main": "src/server.js",
+  "author": "duocanh",
+  "license": "MIT",
+  "private": true,
+  "dependencies": {
+    "express": "^5.1.0"
+  }
+}
