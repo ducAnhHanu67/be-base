@@ -1,14 +1,14 @@
-import express from "express";
+import express from 'express'
 
-const app = express();
+const app = express()
 
-const hostname = "localhost";
-const port = 3000;
+const hostname = 'localhost'
+const port = 3000
 
-app.get("/", function (req, res) {
-  res.send("<h1>Hello World</h1>");
-});
+app.get('/', function (req, res) {
+  res.send('<h1>Hello World</h1>')
+})
 
 app.listen(port, hostname, () => {
-  console.log(`Server running at http://${hostname}:${port}`);
-});
+  console.log(`Server running at http://${hostname}:${port}`)
+})
