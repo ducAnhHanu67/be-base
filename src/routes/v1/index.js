@@ -1,6 +1,8 @@
 import express from 'express'
 import { userRoute } from '~/routes/v1/userRoute'
-import { categoryRouter } from './categoryRoute'
+import { categoryRoute } from './categoryRoute'
+import { bookGenreRoute } from './bookGenreRoute'
+import { productRoute } from './productRoute'
 
 const Router = express.Router()
 
@@ -12,6 +14,10 @@ Router.get('/status', (req, res) => {
 // User API
 Router.use('/users', userRoute)
 
-Router.use('/categories', categoryRouter)
+Router.use('/categories', categoryRoute)
+
+Router.use('/book-genres', bookGenreRoute)
+
+Router.use('/products', productRoute)
 
 export const APIs_V1 = Router

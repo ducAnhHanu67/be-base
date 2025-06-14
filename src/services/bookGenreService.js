@@ -1,10 +1,10 @@
 import { Sequelize } from 'sequelize'
-import Category from '~/models/Category'
+import BookGenre from '~/models/BookGenre'
 import ApiError from '~/utils/ApiError'
 import { Op } from 'sequelize'
 import { DEFAULT_PAGE, DEFAULT_ITEMS_PER_PAGE } from '~/utils/constants'
 
-const getCategories = async (page, itemsPerPage, queryFilter) => {
+const getBookGenres = async (page, itemsPerPage, queryFilter) => {
   try {
     if (!page) page = DEFAULT_PAGE
     if (!itemsPerPage) itemsPerPage = DEFAULT_ITEMS_PER_PAGE
@@ -13,7 +13,7 @@ const getCategories = async (page, itemsPerPage, queryFilter) => {
 
     const whereClause = queryFilter ? { name: { [Op.like]: `%${queryFilter}%` } } : {}
 
-    const { rows: data, count } = await Category.findAndCountAll({
+    const { rows: data, count } = await BookGenre.findAndCountAll({
       where: whereClause,
       limit: parseInt(itemsPerPage, 10),
       offset: parseInt(offset, 10),
@@ -25,62 +25,52 @@ const getCategories = async (page, itemsPerPage, queryFilter) => {
   }
 }
 
-const getCategoryById = async (categoryId) => {
-  try {
-    const category = await Category.findByPk(categoryId)
-    return category
-  } catch (error) {
-    throw error
-  }
-}
-
 const create = async (reqBody) => {
   try {
-    const existCategory = await Category.findOne({
+    const existBookGenre = await BookGenre.findOne({
       where: Sequelize.where(Sequelize.fn('LOWER', Sequelize.col('name')), reqBody.name.toLowerCase())
     })
-    if (existCategory) throw new ApiError(409, 'Danh mục đã tồn tại!')
+    if (existBookGenre) throw new ApiError(409, 'Thể loại sách đã tồn tại!')
 
-    const createdCategory = await Category.create(reqBody)
-    return createdCategory
+    const createdBookGenre = await BookGenre.create(reqBody)
+    return createdBookGenre
   } catch (error) {
     throw error
   }
 }
 
-const update = async (categoryId, reqBody) => {
+const update = async (bookGenreId, reqBody) => {
   try {
-    const existCategory = await Category.findOne({
+    const existBookGenre = await BookGenre.findOne({
       where: Sequelize.where(Sequelize.fn('LOWER', Sequelize.col('name')), reqBody.name.toLowerCase())
     })
-    if (existCategory) throw new ApiError(409, 'Danh mục đã tồn tại!')
+    if (existBookGenre) throw new ApiError(409, 'Thể loại sách đã tồn tại!')
 
-    const updatedCategory = await Category.update(reqBody, {
-      where: { id: categoryId }
+    const updatedBookGenre = await BookGenre.update(reqBody, {
+      where: { id: bookGenreId }
     })
-    return updatedCategory
+    return updatedBookGenre
   } catch (error) {
     throw error
   }
 }
 
-const deleteById = async (categoryId) => {
+const deleteById = async (bookGenreId) => {
   try {
-    const deletedCategory = await Category.destroy({
-      where: { id: categoryId }
+    const deletedBookGenre = await BookGenre.destroy({
+      where: { id: bookGenreId }
     })
-    if (!deletedCategory) {
+    if (!deletedBookGenre) {
       throw new ApiError(409, 'Xóa thất bại!')
     }
-    return deletedCategory
+    return deletedBookGenre
   } catch (error) {
     throw error
   }
 }
 
-export const categoryService = {
-  getCategories,
-  getCategoryById,
+export const bookGenreService = {
+  getBookGenres,
   create,
   update,
   deleteById

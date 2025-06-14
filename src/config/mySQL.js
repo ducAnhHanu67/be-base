@@ -4,12 +4,9 @@ import { env } from '~/config/environment'
 // Tạo đối tượng Sequelize với cấu hình timezone và chuyển đổi bằng
 const sequelize = new Sequelize(env.DATABASE_NAME, 'root', env.DATABASE_PASSWORD, {
   host: env.APP_HOST,
-  port: env.APP_PORT,
+  port: env.DATABASE_PORT,
   dialect: 'mysql',
   timezone: '+07:00',
-  // dialectOptions: {
-  //   useUTC: false
-  // }
   dialectOptions: {
     dateStrings: true, // Buộc trả về date/time như string
     typeCast(field, next) {

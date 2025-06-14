@@ -1,12 +1,9 @@
 import { DataTypes, Model } from 'sequelize'
 import sequelize from '~/config/mySQL'
 
-class Users extends Model {
-  // static associate(models) {
-  //   //
-  // }
-}
-Users.init(
+class User extends Model {}
+
+User.init(
   {
     id: {
       allowNull: false,
@@ -26,7 +23,19 @@ Users.init(
       allowNull: false,
       type: DataTypes.STRING
     },
+    avatar: {
+      allowNull: true,
+      type: DataTypes.STRING
+    },
+    isActive: {
+      allowNull: false,
+      type: DataTypes.BOOLEAN
+    },
     verifyToken: {
+      allowNull: false,
+      type: DataTypes.STRING
+    },
+    role: {
       allowNull: false,
       type: DataTypes.STRING
     }
@@ -38,4 +47,4 @@ Users.init(
   }
 )
 
-export default Users
+export default User

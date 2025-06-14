@@ -1,15 +1,12 @@
 import express from 'express'
 import { categoryController } from '~/controllers/categoryController'
 import { categoryValidation } from '~/validations/categoryValidation'
+import { authMiddleware } from '~/middlewares/authMiddleware'
 
 const Router = express.Router()
 
-Router.get('/status', (req, res) => {
-  res.status(200).json({ message: 'APIs V1 are ready to use.' })
-})
-
 Router.route('/')
-  .get(categoryController.getCategories)
+  .get(authMiddleware.isAuthorized, categoryController.getCategories)
   .post(categoryValidation.validate, categoryController.create)
 
 Router.route('/:id')
@@ -17,4 +14,4 @@ Router.route('/:id')
   .put(categoryValidation.validate, categoryController.update)
   .delete(categoryController.deleteById)
 
-export const categoryRouter = Router
+export const categoryRoute = Router

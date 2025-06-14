@@ -1,5 +1,6 @@
 import { userService } from '~/services/userService'
 import ms from 'ms'
+import { pickUser } from '~/utils/formatters'
 import ApiError from '~/utils/ApiError'
 
 const createNew = async (req, res, next) => {
@@ -32,17 +33,17 @@ const login = async (req, res, next) => {
     res.cookie('accessToken', result.accessToken, {
       httpOnly: true,
       secure: true,
-      sameSite: 'none',
+      sameSite: 'Strict',
       maxAge: ms('14 days')
     })
     res.cookie('refreshToken', result.refreshToken, {
       httpOnly: true,
       secure: true,
-      sameSite: 'none',
+      sameSite: 'Strict',
       maxAge: ms('14 days')
     })
 
-    res.status(200).json(result)
+    res.status(200).json(pickUser(result))
   } catch (error) {
     next(error)
   }
@@ -63,11 +64,10 @@ const logout = async (req, res, next) => {
 const refreshToken = async (req, res, next) => {
   try {
     const result = await userService.refreshToken(req.cookies?.refreshToken)
-
     res.cookie('accessToken', result.accessToken, {
       httpOnly: true,
       secure: true,
-      sameSite: 'none',
+      sameSite: 'Strict',
       maxAge: ms('14 days')
     })
 
@@ -82,11 +82,7 @@ const update = async (req, res, next) => {
     const userId = req.jwtDecoded._id
     const userAvatarFile = req.file
     // console.log('Controller > userAvatarFile: ', userAvatarFile)
-    const updatedUser = await userService.update(
-      userId,
-      req.body,
-      userAvatarFile
-    )
+    const updatedUser = await userService.update(userId, req.body, userAvatarFile)
     res.status(200).json(updatedUser)
   } catch {
     next()

@@ -1,12 +1,17 @@
 import { DataTypes, Model } from 'sequelize'
 import sequelize from '~/config/mySQL'
 
-class Categories extends Model {
+class Category extends Model {
   // static associate(models) {
-  //   //
+  //   this.hasMany(models.Product, {
+  //     foreignKey: 'categoryId',
+  //     as: 'products',
+  //     onUpdate: 'CASCADE'
+  //   })
   // }
 }
-Categories.init(
+
+Category.init(
   {
     id: {
       allowNull: false,
@@ -26,4 +31,4 @@ Categories.init(
   }
 )
 
-export default Categories
+export default Category

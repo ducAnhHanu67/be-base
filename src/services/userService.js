@@ -1,4 +1,4 @@
-import Users from '~/models/users'
+import User from '~/models/User'
 import bcryptjs from 'bcryptjs'
 import { v4 as uuidv4 } from 'uuid'
 import ApiError from '~/utils/ApiError'
@@ -8,7 +8,7 @@ import { env } from '~/config/environment'
 
 const register = async (reqBody) => {
   try {
-    const existUser = await Users.findOne({
+    const existUser = await User.findOne({
       where: { email: reqBody.email }
     })
     if (existUser) {
@@ -20,11 +20,13 @@ const register = async (reqBody) => {
       email: reqBody.email,
       password: bcryptjs.hashSync(reqBody.password, 8), // Tham số thứ 2 là độ phức tạp, giá trị càng cao thì băm càng lâu
       userName: nameFromEmail,
-      verifyToken: uuidv4()
+      verifyToken: uuidv4(),
+      isActive: false,
+      role: 'CLIENT'
     }
-    const createdUser = await Users.create(newUser)
+    const createdUser = await User.create(newUser)
 
-    return formatDateTimes(createdUser.toJSON())
+    return createdUser.toJSON()
   } catch (error) {
     throw new Error(error.message)
   }
@@ -32,15 +34,14 @@ const register = async (reqBody) => {
 
 const login = async (reqBody) => {
   try {
-    const existUser = await Users.findOne({
+    const existUser = await User.findOne({
       where: { email: reqBody.email }
     })
 
-    if (!existUser) throw new ApiError(404, 'Tài khoản không tồn tại!')
-    console.log(existUser)
+    if (!existUser) throw new ApiError(406, 'Email hoặc mật khẩu không chính xác!')
 
     if (!bcryptjs.compareSync(reqBody.password, existUser.password)) {
-      throw new ApiError(406, 'Email hoặc mật khẩu của bạn không chính xác!')
+      throw new ApiError(406, 'Email hoặc mật khẩu không chính xác!')
     }
     // Tạo token đăng nhập trả về phía FE
     // Tạo thông tin đính kèm JWT token bao gồm _id và email user
@@ -52,8 +53,8 @@ const login = async (reqBody) => {
     const accessToken = await JwtProvider.generateToken(
       userInfo,
       env.ACCESS_TOKEN_SECRET_SIGNATURE,
-      // 5
-      env.ACCESS_TOKEN_LIFE
+      15
+      // env.ACCESS_TOKEN_LIFE
     )
 
     const refreshToken = await JwtProvider.generateToken(
@@ -72,7 +73,10 @@ const login = async (reqBody) => {
 const refreshToken = async (clientRefreshToken) => {
   try {
     // Verify / giải mã mã refresh token xem nó hợp lệ không
-    const refreshTokenDecoded = await JwtProvider.verifyToken(clientRefreshToken, env.REFRESH_TOKEN_SECRET_SIGNATURE)
+    const refreshTokenDecoded = await JwtProvider.verifyToken(
+      clientRefreshToken,
+      env.REFRESH_TOKEN_SECRET_SIGNATURE
+    )
     // Đoạn này chỉ lấy thông tin unique để tạo accessToken mới
     const userInfo = {
       id: refreshTokenDecoded.id,
