@@ -6,6 +6,7 @@ import { JwtProvider } from '~/providers/JwtProvider'
 import { pickUser } from '~/utils/formatters'
 import { env } from '~/config/environment'
 import { OAuth2Client } from 'google-auth-library'
+import { Op } from 'sequelize'
 
 const register = async (reqBody) => {
   try {
@@ -166,9 +167,184 @@ const googleLogin = async (googleToken) => {
   }
 }
 
+const update = async (userId, reqBody, userAvatarFile) => {
+  try {
+    const existUser = await User.findByPk(userId)
+    if (!existUser) {
+      throw new ApiError(404, 'User not found!')
+    }
+
+    const updateData = {}
+    if (reqBody.userName) updateData.userName = reqBody.userName
+    if (reqBody.email && reqBody.email !== existUser.email) {
+      // Kiểm tra email trùng lặp
+      const emailExists = await User.findOne({
+        where: { email: reqBody.email }
+      })
+      if (emailExists) {
+        throw new ApiError(409, 'Email already exists!')
+      }
+      updateData.email = reqBody.email
+    }
+
+    // Xử lý avatar nếu có file upload
+    if (userAvatarFile) {
+      // Import UploadImageProvider nếu chưa có
+      const { UploadImageProvider } = await import('~/providers/UploadImageProvider')
+      const uploadResult = await UploadImageProvider.streamUpload(userAvatarFile.buffer, 'users')
+      updateData.avatar = uploadResult.secure_url
+    }
+
+    await User.update(updateData, {
+      where: { id: userId }
+    })
+
+    const updatedUser = await User.findByPk(userId, {
+      attributes: { exclude: ['password', 'verifyToken'] }
+    })
+
+    return pickUser(updatedUser)
+  } catch (error) {
+    throw error
+  }
+}
+
+// Admin Functions
+const getAllUsers = async (page = 1, limit = 10, searchTerm = '') => {
+  try {
+    const offset = (page - 1) * limit
+
+    const whereClause = {}
+    if (searchTerm) {
+      whereClause[Op.or] = [
+        { email: { [Op.like]: `%${searchTerm}%` } },
+        { userName: { [Op.like]: `%${searchTerm}%` } }
+      ]
+    }
+
+    const { count, rows } = await User.findAndCountAll({
+      where: whereClause,
+      limit: parseInt(limit),
+      offset: parseInt(offset),
+      order: [['createdAt', 'DESC']],
+      attributes: { exclude: ['password', 'verifyToken'] }
+    })
+
+    return {
+      data: rows,
+      count,
+      totalPages: Math.ceil(count / limit),
+      currentPage: parseInt(page)
+    }
+  } catch (error) {
+    throw error
+  }
+}
+
+const createUserByAdmin = async (reqBody) => {
+  try {
+    const existUser = await User.findOne({
+      where: { email: reqBody.email }
+    })
+    if (existUser) {
+      throw new ApiError(409, 'Email already exists!')
+    }
+
+    const newUser = {
+      email: reqBody.email,
+      password: bcryptjs.hashSync(reqBody.password, 8),
+      userName: reqBody.userName || reqBody.email.split('@')[0],
+      avatar: reqBody.avatar || null,
+      verifyToken: uuidv4(),
+      isActive: reqBody.isActive !== undefined ? reqBody.isActive : true,
+      role: reqBody.role || 'CLIENT'
+    }
+
+    const createdUser = await User.create(newUser)
+    const userResponse = createdUser.toJSON()
+    delete userResponse.password
+    delete userResponse.verifyToken
+
+    return userResponse
+  } catch (error) {
+    throw error
+  }
+}
+
+const updateUserByAdmin = async (userId, reqBody) => {
+  try {
+    const existUser = await User.findByPk(userId)
+    if (!existUser) {
+      throw new ApiError(404, 'User not found!')
+    }
+
+    // Kiểm tra email trùng lặp nếu có thay đổi email
+    if (reqBody.email && reqBody.email !== existUser.email) {
+      const emailExists = await User.findOne({
+        where: { email: reqBody.email }
+      })
+      if (emailExists) {
+        throw new ApiError(409, 'Email already exists!')
+      }
+    }
+
+    const updateData = {}
+    if (reqBody.email) updateData.email = reqBody.email
+    if (reqBody.userName) updateData.userName = reqBody.userName
+    if (reqBody.avatar) updateData.avatar = reqBody.avatar
+    if (reqBody.isActive !== undefined) updateData.isActive = reqBody.isActive
+    if (reqBody.role) {
+      const validRoles = ['CLIENT', 'ADMIN']
+      if (!validRoles.includes(reqBody.role)) {
+        throw new ApiError(400, 'Invalid role! Valid roles are: CLIENT, ADMIN')
+      }
+      updateData.role = reqBody.role
+    }
+    if (reqBody.password) {
+      updateData.password = bcryptjs.hashSync(reqBody.password, 8)
+    }
+
+    await User.update(updateData, {
+      where: { id: userId }
+    })
+
+    const updatedUser = await User.findByPk(userId, {
+      attributes: { exclude: ['password', 'verifyToken'] }
+    })
+
+    return updatedUser
+  } catch (error) {
+    throw error
+  }
+}
+
+const deleteUser = async (userId) => {
+  try {
+    const existUser = await User.findByPk(userId)
+    if (!existUser) {
+      throw new ApiError(404, 'User not found!')
+    }
+
+    // Hard delete - xóa hoàn toàn khỏi database
+    await User.destroy({
+      where: { id: userId }
+    })
+
+    return { message: 'User has been deleted permanently' }
+  } catch (error) {
+    throw error
+  }
+}
+
 export const userService = {
   register,
   login,
   refreshToken,
-  googleLogin
+  googleLogin,
+  update,
+  // Admin functions
+  getAllUsers,
+  createUserByAdmin,
+  updateUserByAdmin,
+  deleteUser
 }

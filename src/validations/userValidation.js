@@ -80,10 +80,81 @@ const googleLogin = async (req, res, next) => {
   }
 }
 
+// Admin Validations
+const createUserByAdmin = async (req, res, next) => {
+  const correctCondition = Joi.object({
+    email: Joi.string().required().pattern(EMAIL_RULE).message(EMAIL_RULE_MESSAGE),
+    password: Joi.string().required().pattern(PASSWORD_RULE).message(PASSWORD_RULE_MESSAGE),
+    userName: Joi.string().trim().min(2).max(50).messages({
+      'string.min': 'User name must be at least 2 characters',
+      'string.max': 'User name must not exceed 50 characters'
+    }),
+    avatar: Joi.string().uri().allow(null, ''),
+    isActive: Joi.boolean(),
+    role: Joi.string().valid('CLIENT', 'ADMIN').messages({
+      'any.only': 'Role must be either CLIENT or ADMIN'
+    })
+  })
+
+  try {
+    await correctCondition.validateAsync(req.body, { abortEarly: false })
+    next()
+  } catch (error) {
+    next(new ApiError(422, new Error(error).message))
+  }
+}
+
+const updateUserByAdmin = async (req, res, next) => {
+  const correctCondition = Joi.object({
+    email: Joi.string().pattern(EMAIL_RULE).message(EMAIL_RULE_MESSAGE),
+    password: Joi.string().pattern(PASSWORD_RULE).message(PASSWORD_RULE_MESSAGE),
+    userName: Joi.string().trim().min(2).max(50).messages({
+      'string.min': 'User name must be at least 2 characters',
+      'string.max': 'User name must not exceed 50 characters'
+    }),
+    avatar: Joi.string().uri().allow(null, ''),
+    isActive: Joi.boolean(),
+    role: Joi.string().valid('CLIENT', 'ADMIN').messages({
+      'any.only': 'Role must be either CLIENT or ADMIN'
+    })
+  })
+  try {
+    await correctCondition.validateAsync(req.body, {
+      abortEarly: false,
+      allowUnknown: false
+    })
+    next()
+  } catch (error) {
+    next(new ApiError(422, new Error(error).message))
+  }
+}
+
+const validateUserId = async (req, res, next) => {
+  const correctCondition = Joi.object({
+    userId: Joi.number().integer().positive().required().messages({
+      'number.base': 'User ID must be a number',
+      'number.integer': 'User ID must be an integer',
+      'number.positive': 'User ID must be positive',
+      'any.required': 'User ID is required'
+    })
+  })
+
+  try {
+    await correctCondition.validateAsync(req.params, { abortEarly: false })
+    next()
+  } catch (error) {
+    next(new ApiError(422, new Error(error).message))
+  }
+}
+
 export const userValidation = {
   createNew,
   verifyAccount,
   login,
   update,
-  googleLogin
+  googleLogin,
+  // Admin validations
+  createUserByAdmin,
+  updateUserByAdmin,
+  validateUserId
 }

@@ -1,6 +1,7 @@
 import { JwtProvider } from '~/providers/JwtProvider'
 import { env } from '~/config/environment'
 import ApiError from '~/utils/ApiError'
+import User from '~/models/User'
 
 // Middleware này đảm nhiệm việc quan trọng: Xác thực JWT accessToken nhận được từ phía FE có hợp lệ hay không
 const isAuthorized = async (req, res, next) => {
@@ -36,4 +37,37 @@ const isAuthorized = async (req, res, next) => {
   }
 }
 
-export const authMiddleware = { isAuthorized }
+// Middleware kiểm tra quyền Admin
+const isAdmin = async (req, res, next) => {
+  try {
+    // Lấy thông tin user từ token đã được decode trong middleware isAuthorized
+    const userId = req.jwtDecoded?.id
+
+    if (!userId) {
+      next(new ApiError(401, 'Unauthorized! User not found in token'))
+      return
+    }
+
+    // Lấy thông tin user từ database để kiểm tra role
+    const user = await User.findByPk(userId)
+
+    if (!user) {
+      next(new ApiError(404, 'User not found'))
+      return
+    }
+
+    // Kiểm tra quyền admin
+    if (user.role !== 'ADMIN') {
+      next(new ApiError(403, 'Forbidden! Admin access required'))
+      return
+    }
+
+    // Lưu thông tin user vào request để sử dụng ở các middleware tiếp theo
+    req.currentUser = user
+    next()
+  } catch {
+    next(new ApiError(500, 'Internal server error'))
+  }
+}
+
+export const authMiddleware = { isAuthorized, isAdmin }

@@ -119,6 +119,52 @@ const googleLogin = async (req, res, next) => {
   }
 }
 
+// Admin Controllers
+const getAllUsers = async (req, res, next) => {
+  try {
+    const { page = 1, limit = 10, search = '' } = req.query
+    const result = await userService.getAllUsers(page, limit, search)
+    res.status(200).json(result)
+  } catch (error) {
+    next(error)
+  }
+}
+
+const createUserByAdmin = async (req, res, next) => {
+  try {
+    const createdUser = await userService.createUserByAdmin(req.body)
+    res.status(201).json({
+      message: 'User created successfully',
+      user: createdUser
+    })
+  } catch (error) {
+    next(error)
+  }
+}
+
+const updateUserByAdmin = async (req, res, next) => {
+  try {
+    const { userId } = req.params
+    const updatedUser = await userService.updateUserByAdmin(userId, req.body)
+    res.status(200).json({
+      message: 'User updated successfully',
+      user: updatedUser
+    })
+  } catch (error) {
+    next(error)
+  }
+}
+
+const deleteUser = async (req, res, next) => {
+  try {
+    const { userId } = req.params
+    const result = await userService.deleteUser(userId)
+    res.status(200).json(result)
+  } catch (error) {
+    next(error)
+  }
+}
+
 export const userController = {
   createNew,
   verifyAccount,
@@ -126,5 +172,10 @@ export const userController = {
   logout,
   refreshToken,
   update,
-  googleLogin
+  googleLogin,
+  // Admin functions
+  getAllUsers,
+  createUserByAdmin,
+  updateUserByAdmin,
+  deleteUser
 }
