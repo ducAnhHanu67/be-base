@@ -89,11 +89,42 @@ const update = async (req, res, next) => {
   }
 }
 
+const googleLogin = async (req, res, next) => {
+  try {
+    const { googleToken } = req.body
+
+    if (!googleToken) {
+      throw new ApiError(400, 'Google token is required')
+    }
+
+    const result = await userService.googleLogin(googleToken)
+
+    // Set cookies như login thông thường
+    res.cookie('accessToken', result.accessToken, {
+      httpOnly: true,
+      secure: true,
+      sameSite: 'Strict',
+      maxAge: ms('14 days')
+    })
+    res.cookie('refreshToken', result.refreshToken, {
+      httpOnly: true,
+      secure: true,
+      sameSite: 'Strict',
+      maxAge: ms('14 days')
+    })
+
+    res.status(200).json(pickUser(result))
+  } catch (error) {
+    next(error)
+  }
+}
+
 export const userController = {
   createNew,
   verifyAccount,
   login,
   logout,
   refreshToken,
-  update
+  update,
+  googleLogin
 }

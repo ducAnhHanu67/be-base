@@ -1,22 +1,11 @@
 import Joi from 'joi'
 import ApiError from '~/utils/ApiError'
-import {
-  EMAIL_RULE,
-  EMAIL_RULE_MESSAGE,
-  PASSWORD_RULE,
-  PASSWORD_RULE_MESSAGE
-} from '~/utils/validators'
+import { EMAIL_RULE, EMAIL_RULE_MESSAGE, PASSWORD_RULE, PASSWORD_RULE_MESSAGE } from '~/utils/validators'
 
 const createNew = async (req, res, next) => {
   const correctCondition = Joi.object({
-    email: Joi.string()
-      .required()
-      .pattern(EMAIL_RULE)
-      .message(EMAIL_RULE_MESSAGE),
-    password: Joi.string()
-      .required()
-      .pattern(PASSWORD_RULE)
-      .message(PASSWORD_RULE_MESSAGE)
+    email: Joi.string().required().pattern(EMAIL_RULE).message(EMAIL_RULE_MESSAGE),
+    password: Joi.string().required().pattern(PASSWORD_RULE).message(PASSWORD_RULE_MESSAGE)
   })
   try {
     await correctCondition.validateAsync(req.body, { abortEarly: false })
@@ -28,10 +17,7 @@ const createNew = async (req, res, next) => {
 
 const verifyAccount = async (req, res, next) => {
   const correctCondition = Joi.object({
-    email: Joi.string()
-      .required()
-      .pattern(EMAIL_RULE)
-      .message(EMAIL_RULE_MESSAGE),
+    email: Joi.string().required().pattern(EMAIL_RULE).message(EMAIL_RULE_MESSAGE),
     token: Joi.string().required()
   })
 
@@ -45,14 +31,8 @@ const verifyAccount = async (req, res, next) => {
 
 const login = async (req, res, next) => {
   const correctCondition = Joi.object({
-    email: Joi.string()
-      .required()
-      .pattern(EMAIL_RULE)
-      .message(EMAIL_RULE_MESSAGE),
-    password: Joi.string()
-      .required()
-      .pattern(PASSWORD_RULE)
-      .message(PASSWORD_RULE_MESSAGE)
+    email: Joi.string().required().pattern(EMAIL_RULE).message(EMAIL_RULE_MESSAGE),
+    password: Joi.string().required().pattern(PASSWORD_RULE).message(PASSWORD_RULE_MESSAGE)
   })
 
   try {
@@ -69,9 +49,7 @@ const update = async (req, res, next) => {
     current_password: Joi.string()
       .pattern(PASSWORD_RULE)
       .message(`current_password: ${PASSWORD_RULE_MESSAGE}`),
-    new_password: Joi.string()
-      .pattern(PASSWORD_RULE)
-      .message(`new_password: ${PASSWORD_RULE_MESSAGE}`)
+    new_password: Joi.string().pattern(PASSWORD_RULE).message(`new_password: ${PASSWORD_RULE_MESSAGE}`)
   })
 
   try {
@@ -86,9 +64,26 @@ const update = async (req, res, next) => {
   }
 }
 
+const googleLogin = async (req, res, next) => {
+  const correctCondition = Joi.object({
+    googleToken: Joi.string().required().messages({
+      'string.empty': 'Google token is required',
+      'any.required': 'Google token is required'
+    })
+  })
+
+  try {
+    await correctCondition.validateAsync(req.body, { abortEarly: false })
+    next()
+  } catch (error) {
+    next(new ApiError(422, new Error(error).message))
+  }
+}
+
 export const userValidation = {
   createNew,
   verifyAccount,
   login,
-  update
+  update,
+  googleLogin
 }

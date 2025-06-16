@@ -5,6 +5,7 @@ import ApiError from '~/utils/ApiError'
 import { JwtProvider } from '~/providers/JwtProvider'
 import { pickUser } from '~/utils/formatters'
 import { env } from '~/config/environment'
+import { OAuth2Client } from 'google-auth-library'
 
 const register = async (reqBody) => {
   try {
@@ -97,8 +98,77 @@ const refreshToken = async (clientRefreshToken) => {
   }
 }
 
+const googleLogin = async (googleToken) => {
+  try {
+    // Nếu không có GOOGLE_CLIENT_ID, ném lỗi
+    if (!env.GOOGLE_CLIENT_ID) {
+      throw new ApiError(500, 'Google Client ID not configured')
+    }
+
+    const client = new OAuth2Client(env.GOOGLE_CLIENT_ID)
+
+    // Xác thực Google token
+    const ticket = await client.verifyIdToken({
+      idToken: googleToken,
+      audience: env.GOOGLE_CLIENT_ID
+    })
+
+    const payload = ticket.getPayload()
+    const { email, name, picture } = payload
+
+    if (!email) {
+      throw new ApiError(400, 'Cannot get email from Google token')
+    }
+
+    // Kiểm tra user đã tồn tại chưa
+    let existUser = await User.findOne({
+      where: { email: email }
+    })
+
+    // Nếu chưa tồn tại, tạo user mới
+    if (!existUser) {
+      const newUser = {
+        email: email,
+        password: bcryptjs.hashSync(uuidv4(), 8), // Random password cho Google user
+        userName: name || email.split('@')[0],
+        avatar: picture || null,
+        verifyToken: 'google_verified',
+        isActive: true, // Google user mặc định đã active
+        role: 'CLIENT'
+      }
+      existUser = await User.create(newUser)
+    }
+
+    // Tạo token đăng nhập
+    const userInfo = {
+      id: existUser.id,
+      email: existUser.email
+    }
+
+    const accessToken = await JwtProvider.generateToken(
+      userInfo,
+      env.ACCESS_TOKEN_SECRET_SIGNATURE,
+      env.ACCESS_TOKEN_LIFE
+    )
+
+    const refreshToken = await JwtProvider.generateToken(
+      userInfo,
+      env.REFRESH_TOKEN_SECRET_SIGNATURE,
+      env.REFRESH_TOKEN_LIFE
+    )
+
+    return { accessToken, refreshToken, ...pickUser(existUser) }
+  } catch (error) {
+    if (error instanceof ApiError) {
+      throw error
+    }
+    throw new ApiError(401, 'Invalid Google token')
+  }
+}
+
 export const userService = {
   register,
   login,
-  refreshToken
+  refreshToken,
+  googleLogin
 }
