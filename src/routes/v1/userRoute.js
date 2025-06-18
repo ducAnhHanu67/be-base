@@ -18,6 +18,19 @@ Router.route('/refresh-token').get(userController.refreshToken)
 
 Router.route('/profile').put(authMiddleware.isAuthorized, userValidation.update, userController.update)
 
+// New profile management routes
+Router.route('/profile/update').put(
+  authMiddleware.isAuthorized,
+  userValidation.updateProfile,
+  userController.updateProfile
+)
+
+Router.route('/profile/change-password').put(
+  authMiddleware.isAuthorized,
+  userValidation.updatePassword,
+  userController.updatePassword
+)
+
 // Admin routes - yêu cầu xác thực và quyền admin
 Router.route('/admin/users')
   .get(authMiddleware.isAuthorized, authMiddleware.isAdmin, userController.getAllUsers)

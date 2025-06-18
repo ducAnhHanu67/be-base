@@ -156,6 +156,52 @@ const validateUserId = async (req, res, next) => {
   }
 }
 
+const updateProfile = async (req, res, next) => {
+  const correctCondition = Joi.object({
+    userName: Joi.string().trim().min(2).max(50).messages({
+      'string.min': 'User name must be at least 2 characters',
+      'string.max': 'User name must not exceed 50 characters'
+    }),
+    email: Joi.string().pattern(EMAIL_RULE).message(EMAIL_RULE_MESSAGE),
+    address: Joi.string().trim().max(500).allow('').messages({
+      'string.max': 'Address must not exceed 500 characters'
+    }),
+    avatar: Joi.string().uri().allow('').messages({
+      'string.uri': 'Avatar must be a valid URL'
+    })
+  })
+
+  try {
+    await correctCondition.validateAsync(req.body, {
+      abortEarly: false,
+      allowUnknown: true
+    })
+    next()
+  } catch (error) {
+    next(new ApiError(422, new Error(error).message))
+  }
+}
+
+const updatePassword = async (req, res, next) => {
+  const correctCondition = Joi.object({
+    currentPassword: Joi.string()
+      .required()
+      .pattern(PASSWORD_RULE)
+      .message(`Current password: ${PASSWORD_RULE_MESSAGE}`),
+    newPassword: Joi.string()
+      .required()
+      .pattern(PASSWORD_RULE)
+      .message(`New password: ${PASSWORD_RULE_MESSAGE}`)
+  })
+
+  try {
+    await correctCondition.validateAsync(req.body, { abortEarly: false })
+    next()
+  } catch (error) {
+    next(new ApiError(422, new Error(error).message))
+  }
+}
+
 export const userValidation = {
   createNew,
   verifyAccount,
@@ -165,5 +211,8 @@ export const userValidation = {
   // Admin validations
   createUserByAdmin,
   updateUserByAdmin,
-  validateUserId
+  validateUserId,
+  // New user profile validations
+  updateProfile,
+  updatePassword
 }

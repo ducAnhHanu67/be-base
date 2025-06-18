@@ -165,6 +165,29 @@ const deleteUser = async (req, res, next) => {
   }
 }
 
+const updateProfile = async (req, res, next) => {
+  try {
+    const userId = req.jwtDecoded.id
+    const updatedUser = await userService.updateProfile(userId, req.body)
+    res.status(200).json({
+      message: 'Profile updated successfully',
+      user: updatedUser
+    })
+  } catch (error) {
+    next(error)
+  }
+}
+
+const updatePassword = async (req, res, next) => {
+  try {
+    const userId = req.jwtDecoded.id
+    const result = await userService.updatePassword(userId, req.body)
+    res.status(200).json(result)
+  } catch (error) {
+    next(error)
+  }
+}
+
 export const userController = {
   createNew,
   verifyAccount,
@@ -177,5 +200,8 @@ export const userController = {
   getAllUsers,
   createUserByAdmin,
   updateUserByAdmin,
-  deleteUser
+  deleteUser,
+  // New user profile functions
+  updateProfile,
+  updatePassword
 }

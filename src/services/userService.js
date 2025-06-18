@@ -339,6 +339,78 @@ const deleteUser = async (userId) => {
   }
 }
 
+const updateProfile = async (userId, reqBody) => {
+  try {
+    const existUser = await User.findByPk(userId)
+    if (!existUser) {
+      throw new ApiError(404, 'User not found!')
+    }
+
+    const updateData = {}
+
+    if (reqBody.userName) {
+      updateData.userName = reqBody.userName
+    }
+
+    if (reqBody.address !== undefined) {
+      updateData.address = reqBody.address
+    }
+
+    if (reqBody.avatar) {
+      updateData.avatar = reqBody.avatar
+    }
+
+    if (reqBody.email && reqBody.email !== existUser.email) {
+      const emailExists = await User.findOne({
+        where: { email: reqBody.email }
+      })
+      if (emailExists) {
+        throw new ApiError(409, 'Email already exists!')
+      }
+      updateData.email = reqBody.email
+    }
+
+    await User.update(updateData, {
+      where: { id: userId }
+    })
+
+    const updatedUser = await User.findByPk(userId, {
+      attributes: { exclude: ['password', 'verifyToken'] }
+    })
+
+    return pickUser(updatedUser)
+  } catch (error) {
+    throw error
+  }
+}
+
+const updatePassword = async (userId, reqBody) => {
+  try {
+    const { currentPassword, newPassword } = reqBody
+
+    const existUser = await User.findByPk(userId)
+    if (!existUser) {
+      throw new ApiError(404, 'User not found!')
+    }
+
+    if (!bcryptjs.compareSync(currentPassword, existUser.password)) {
+      throw new ApiError(400, 'Current password is incorrect!')
+    }
+
+    if (bcryptjs.compareSync(newPassword, existUser.password)) {
+      throw new ApiError(400, 'New password must be different from current password!')
+    }
+
+    const hashedNewPassword = bcryptjs.hashSync(newPassword, 8)
+
+    await User.update({ password: hashedNewPassword }, { where: { id: userId } })
+
+    return { message: 'Password updated successfully' }
+  } catch (error) {
+    throw error
+  }
+}
+
 export const userService = {
   register,
   login,
@@ -349,5 +421,8 @@ export const userService = {
   getAllUsers,
   createUserByAdmin,
   updateUserByAdmin,
-  deleteUser
+  deleteUser,
+  // New user profile functions
+  updateProfile,
+  updatePassword
 }
