@@ -297,9 +297,9 @@ const updateUserByAdmin = async (userId, reqBody) => {
     if (reqBody.address !== undefined) updateData.address = reqBody.address
     if (reqBody.isActive !== undefined) updateData.isActive = reqBody.isActive
     if (reqBody.role) {
-      const validRoles = ['CLIENT', 'ADMIN']
+      const validRoles = ['CLIENT', 'USER', 'ADMIN']
       if (!validRoles.includes(reqBody.role)) {
-        throw new ApiError(400, 'Invalid role! Valid roles are: CLIENT, ADMIN')
+        throw new ApiError(400, 'Invalid role! Valid roles are: CLIENT, USER, ADMIN')
       }
       updateData.role = reqBody.role
     }

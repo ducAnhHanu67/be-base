@@ -97,8 +97,8 @@ const createUserByAdmin = async (req, res, next) => {
       'string.max': 'Address must not exceed 500 characters'
     }),
     isActive: Joi.boolean(),
-    role: Joi.string().valid('CLIENT', 'ADMIN').messages({
-      'any.only': 'Role must be either CLIENT or ADMIN'
+    role: Joi.string().valid('CLIENT', 'USER', 'ADMIN').messages({
+      'any.only': 'Role must be CLIENT, USER or ADMIN'
     })
   })
 
@@ -123,8 +123,8 @@ const updateUserByAdmin = async (req, res, next) => {
       'string.max': 'Address must not exceed 500 characters'
     }),
     isActive: Joi.boolean(),
-    role: Joi.string().valid('CLIENT', 'ADMIN').messages({
-      'any.only': 'Role must be either CLIENT or ADMIN'
+    role: Joi.string().valid('CLIENT', 'USER', 'ADMIN').messages({
+      'any.only': 'Role must be CLIENT, USER or ADMIN'
     })
   })
   try {
