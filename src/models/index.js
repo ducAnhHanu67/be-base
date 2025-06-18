@@ -45,4 +45,4 @@ StationeryDetail.belongsTo(Product, {
   as: 'product'
 })
 
-export { Category, BookGenre, Product, BookDetail, StationeryDetail, ProductImage }
+export { Category, BookGenre, Product, BookDetail, StationeryDetail, ProductImage, Coupon }

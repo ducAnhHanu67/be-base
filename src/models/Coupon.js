@@ -1,5 +1,5 @@
 import { DataTypes } from 'sequelize'
-import { sequelize } from '~/config/mySQL'
+import sequelize from '~/config/mySQL'
 
 const Coupon = sequelize.define(
   'Coupon',
@@ -7,7 +7,8 @@ const Coupon = sequelize.define(
     id: {
       type: DataTypes.INTEGER,
       primaryKey: true,
-      autoIncrement: true
+      autoIncrement: true,
+      allowNull: false
     },
     code: {
       type: DataTypes.STRING(50),
