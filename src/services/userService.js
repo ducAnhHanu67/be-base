@@ -176,6 +176,7 @@ const update = async (userId, reqBody, userAvatarFile) => {
 
     const updateData = {}
     if (reqBody.userName) updateData.userName = reqBody.userName
+    if (reqBody.address !== undefined) updateData.address = reqBody.address
     if (reqBody.email && reqBody.email !== existUser.email) {
       // Kiểm tra email trùng lặp
       const emailExists = await User.findOne({
@@ -255,6 +256,7 @@ const createUserByAdmin = async (reqBody) => {
       password: bcryptjs.hashSync(reqBody.password, 8),
       userName: reqBody.userName || reqBody.email.split('@')[0],
       avatar: reqBody.avatar || null,
+      address: reqBody.address || null,
       verifyToken: uuidv4(),
       isActive: reqBody.isActive !== undefined ? reqBody.isActive : true,
       role: reqBody.role || 'CLIENT'
@@ -292,6 +294,7 @@ const updateUserByAdmin = async (userId, reqBody) => {
     if (reqBody.email) updateData.email = reqBody.email
     if (reqBody.userName) updateData.userName = reqBody.userName
     if (reqBody.avatar) updateData.avatar = reqBody.avatar
+    if (reqBody.address !== undefined) updateData.address = reqBody.address
     if (reqBody.isActive !== undefined) updateData.isActive = reqBody.isActive
     if (reqBody.role) {
       const validRoles = ['CLIENT', 'ADMIN']

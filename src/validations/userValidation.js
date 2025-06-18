@@ -46,6 +46,9 @@ const login = async (req, res, next) => {
 const update = async (req, res, next) => {
   const correctCondition = Joi.object({
     displayName: Joi.string().trim().strict(),
+    address: Joi.string().trim().max(500).allow('').messages({
+      'string.max': 'Address must not exceed 500 characters'
+    }),
     current_password: Joi.string()
       .pattern(PASSWORD_RULE)
       .message(`current_password: ${PASSWORD_RULE_MESSAGE}`),
@@ -90,6 +93,9 @@ const createUserByAdmin = async (req, res, next) => {
       'string.max': 'User name must not exceed 50 characters'
     }),
     avatar: Joi.string().uri().allow(null, ''),
+    address: Joi.string().trim().max(500).allow('').messages({
+      'string.max': 'Address must not exceed 500 characters'
+    }),
     isActive: Joi.boolean(),
     role: Joi.string().valid('CLIENT', 'ADMIN').messages({
       'any.only': 'Role must be either CLIENT or ADMIN'
@@ -113,6 +119,9 @@ const updateUserByAdmin = async (req, res, next) => {
       'string.max': 'User name must not exceed 50 characters'
     }),
     avatar: Joi.string().uri().allow(null, ''),
+    address: Joi.string().trim().max(500).allow('').messages({
+      'string.max': 'Address must not exceed 500 characters'
+    }),
     isActive: Joi.boolean(),
     role: Joi.string().valid('CLIENT', 'ADMIN').messages({
       'any.only': 'Role must be either CLIENT or ADMIN'
