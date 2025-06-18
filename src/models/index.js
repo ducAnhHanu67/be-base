@@ -5,6 +5,7 @@ import Product from './Product'
 import BookDetail from './BookDetail'
 import StationeryDetail from './StationeryDetail'
 import ProductImage from './ProductImage'
+import Coupon from './Coupon'
 
 Category.hasOne(Product, {
   foreignKey: 'categoryId',
