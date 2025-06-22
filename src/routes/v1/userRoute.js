@@ -16,7 +16,9 @@ Router.route('/logout').delete(userController.logout)
 
 Router.route('/refresh-token').get(userController.refreshToken)
 
-Router.route('/profile').put(authMiddleware.isAuthorized, userValidation.update, userController.update)
+Router.route('/profile')
+  .get(authMiddleware.isAuthorized, userController.getProfile)
+  .put(authMiddleware.isAuthorized, userValidation.update, userController.update)
 
 // New profile management routes
 Router.route('/profile/update').put(

@@ -10,11 +10,11 @@ module.exports = {
 
     await queryInterface.bulkInsert('users', [
       {
+        id: 1,
         email: 'admin@heybook.com',
         password: hashedPassword1,
         user_name: 'Admin',
         avatar: 'https://example.com/admin-avatar.jpg',
-        address: '123 Admin Street, Ho Chi Minh City',
         is_active: true,
         verify_token: 'verified',
         role: 'ADMIN',
@@ -22,11 +22,11 @@ module.exports = {
         updated_at: new Date()
       },
       {
+        id: 2,
         email: 'user1@gmail.com',
         password: hashedPassword2,
         user_name: 'Nguyễn Văn A',
         avatar: 'https://example.com/user1-avatar.jpg',
-        address: '456 Nguyen Van Cu, District 1, Ho Chi Minh City',
         is_active: true,
         verify_token: 'verified',
         role: 'USER',
@@ -34,11 +34,11 @@ module.exports = {
         updated_at: new Date()
       },
       {
+        id: 3,
         email: 'user2@gmail.com',
         password: hashedPassword3,
         user_name: 'Trần Thị B',
         avatar: null,
-        address: '789 Le Loi, District 3, Ho Chi Minh City',
         is_active: true,
         verify_token: 'pending_verification_token',
         role: 'USER',

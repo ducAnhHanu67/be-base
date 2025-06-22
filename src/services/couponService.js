@@ -4,16 +4,19 @@ import { Sequelize } from 'sequelize'
 
 const getCoupons = async (queryFilters) => {
   try {
-    const { page = 1, limit = 10, search, isActive, type } = queryFilters
+    const { page = 1, limit = 10, search, isActive, type, status } = queryFilters
     const offset = (page - 1) * limit
 
     const whereClause = {}
+    const currentDate = new Date()
 
+    // Build search conditions
+    const searchConditions = []
     if (search) {
-      whereClause[Sequelize.Op.or] = [
+      searchConditions.push(
         { code: { [Sequelize.Op.like]: `%${search}%` } },
         { name: { [Sequelize.Op.like]: `%${search}%` } }
-      ]
+      )
     }
 
     if (isActive !== undefined) {
@@ -22,6 +25,37 @@ const getCoupons = async (queryFilters) => {
 
     if (type) {
       whereClause.type = type
+    }
+
+    // Filter for active status - chỉ lấy voucher thực sự có thể sử dụng
+    if (status === 'active') {
+      whereClause.isActive = true // Voucher phải được active
+      whereClause.startDate = { [Sequelize.Op.lte]: currentDate } // Đã đến hạn sử dụng
+      whereClause.endDate = { [Sequelize.Op.gte]: currentDate } // Chưa quá hạn
+
+      // Thêm điều kiện cho voucher chưa sử dụng hết
+      const usageLimitConditions = [
+        { usageLimit: null }, // Không giới hạn số lần sử dụng
+        {
+          [Sequelize.Op.and]: [
+            { usageLimit: { [Sequelize.Op.not]: null } },
+            Sequelize.where(Sequelize.col('usedCount'), Sequelize.Op.lt, Sequelize.col('usageLimit'))
+          ]
+        }
+      ]
+
+      // Combine search and usage limit conditions properly
+      if (searchConditions.length > 0) {
+        whereClause[Sequelize.Op.and] = [
+          { [Sequelize.Op.or]: searchConditions },
+          { [Sequelize.Op.or]: usageLimitConditions }
+        ]
+      } else {
+        whereClause[Sequelize.Op.or] = usageLimitConditions
+      }
+    } else if (searchConditions.length > 0) {
+      // Only search conditions, no active status filter
+      whereClause[Sequelize.Op.or] = searchConditions
     }
 
     const { count, rows } = await Coupon.findAndCountAll({
@@ -182,7 +216,12 @@ const applyCoupon = async (code, orderAmount) => {
         discountAmount = coupon.maxDiscountAmount
       }
     } else {
+      // FIXED_AMOUNT
       discountAmount = coupon.value
+      // Apply maxDiscountAmount limit for FIXED_AMOUNT as well
+      if (coupon.maxDiscountAmount && discountAmount > coupon.maxDiscountAmount) {
+        discountAmount = coupon.maxDiscountAmount
+      }
       if (discountAmount > orderAmount) {
         discountAmount = orderAmount
       }

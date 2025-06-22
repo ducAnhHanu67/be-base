@@ -5,6 +5,7 @@ module.exports = {
   async up(queryInterface) {
     await queryInterface.bulkInsert('products', [
       {
+        id: 1,
         category_id: 1,
         name: 'Harry Potter và Hòn đá Phù thủy',
         price: 150000,
@@ -18,6 +19,7 @@ module.exports = {
         updated_at: new Date()
       },
       {
+        id: 2,
         category_id: 1,
         name: 'Đắc Nhân Tâm',
         price: 89000,
@@ -31,6 +33,7 @@ module.exports = {
         updated_at: new Date()
       },
       {
+        id: 3,
         category_id: 1,
         name: 'Sapiens: Lược sử loài người',
         price: 299000,
@@ -44,6 +47,7 @@ module.exports = {
         updated_at: new Date()
       },
       {
+        id: 4,
         category_id: 1,
         name: 'Tôi thấy hoa vàng trên cỏ xanh',
         price: 85000,
@@ -57,6 +61,7 @@ module.exports = {
         updated_at: new Date()
       },
       {
+        id: 5,
         category_id: 1,
         name: 'Atomic Habits',
         price: 199000,
@@ -70,6 +75,7 @@ module.exports = {
         updated_at: new Date()
       },
       {
+        id: 6,
         category_id: 2,
         name: 'Bút bi Thiên Long TL-027',
         price: 5000,
@@ -83,6 +89,7 @@ module.exports = {
         updated_at: new Date()
       },
       {
+        id: 7,
         category_id: 2,
         name: 'Tập vở 200 trang ô li',
         price: 15000,
@@ -96,6 +103,7 @@ module.exports = {
         updated_at: new Date()
       },
       {
+        id: 8,
         category_id: 3,
         name: 'Bộ compa học sinh',
         price: 45000,
@@ -109,6 +117,7 @@ module.exports = {
         updated_at: new Date()
       },
       {
+        id: 9,
         category_id: 3,
         name: 'Thước kẻ 30cm',
         price: 8000,

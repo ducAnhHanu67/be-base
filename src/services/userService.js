@@ -72,6 +72,22 @@ const login = async (reqBody) => {
   }
 }
 
+const getProfile = async (userId) => {
+  try {
+    const user = await User.findByPk(userId, {
+      attributes: { exclude: ['password', 'verifyToken'] }
+    })
+
+    if (!user) {
+      throw new ApiError(404, 'User not found!')
+    }
+
+    return pickUser(user)
+  } catch (error) {
+    throw error
+  }
+}
+
 const refreshToken = async (clientRefreshToken) => {
   try {
     // Verify / giải mã mã refresh token xem nó hợp lệ không
@@ -424,5 +440,6 @@ export const userService = {
   deleteUser,
   // New user profile functions
   updateProfile,
-  updatePassword
+  updatePassword,
+  getProfile
 }

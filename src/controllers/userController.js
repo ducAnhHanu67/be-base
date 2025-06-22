@@ -77,9 +77,19 @@ const refreshToken = async (req, res, next) => {
   }
 }
 
+const getProfile = async (req, res, next) => {
+  try {
+    const userId = req.jwtDecoded.id
+    const userProfile = await userService.getProfile(userId)
+    res.status(200).json(userProfile)
+  } catch (error) {
+    next(error)
+  }
+}
+
 const update = async (req, res, next) => {
   try {
-    const userId = req.jwtDecoded._id
+    const userId = req.jwtDecoded.id
     const userAvatarFile = req.file
     // console.log('Controller > userAvatarFile: ', userAvatarFile)
     const updatedUser = await userService.update(userId, req.body, userAvatarFile)
@@ -203,5 +213,6 @@ export const userController = {
   deleteUser,
   // New user profile functions
   updateProfile,
-  updatePassword
+  updatePassword,
+  getProfile
 }
