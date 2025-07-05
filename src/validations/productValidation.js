@@ -73,7 +73,9 @@ const validateSearch = async (req, res, next) => {
       language: Joi.string().max(100).trim().optional(),
       categoryId: Joi.number().integer().positive().optional(),
       minPrice: Joi.number().min(0).optional(),
-      maxPrice: Joi.number().positive().optional()
+      maxPrice: Joi.number().positive().optional(),
+      isTrend: Joi.boolean().optional()
+
     })
       .custom((value, helpers) => {
         // Validate logic: nếu có bookGenreId hoặc language thì type phải là BOOK

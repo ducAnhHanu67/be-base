@@ -54,7 +54,13 @@ Product.init(
       allowNull: false,
       type: DataTypes.ENUM('BOOK', 'STATIONERY'),
       primaryKey: true
+    },
+    isTrend: {
+      type: DataTypes.BOOLEAN,
+      allowNull: false,
+      defaultValue: false
     }
+
   },
   {
     timestamps: true,

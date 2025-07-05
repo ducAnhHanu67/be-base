@@ -483,6 +483,13 @@ const searchAndFilterProducts = async (filters) => {
       whereClause.categoryId = categoryId
     }
 
+    if (filters.isTrend !== undefined) {
+      const trendRaw = filters.isTrend
+      const isTrendBool = trendRaw === '1' || trendRaw === 1 || trendRaw === true || trendRaw === 'true'
+      whereClause.isTrend = isTrendBool
+    }
+
+
     // Filter theo giá - tính theo giá sau discount
     const hasMinPrice = minPrice !== undefined && minPrice !== null && minPrice !== '' && !isNaN(minPrice)
     const hasMaxPrice = maxPrice !== undefined && maxPrice !== null && maxPrice !== '' && !isNaN(maxPrice)
