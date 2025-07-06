@@ -94,6 +94,15 @@ const searchAndFilterProducts = async (req, res, next) => {
     next(error)
   }
 }
+const getProductTrend = async (req, res, next) => {
+  try {
+    const products = await productService.getTopTrendingProducts()
+    res.status(200).json({ success: true, data: products })
+  } catch (error) {
+    next(error)
+  }
+}
+
 
 export const productController = {
   create,
@@ -103,5 +112,6 @@ export const productController = {
   deleteById,
   getCategories,
   getBookGenres,
-  searchAndFilterProducts
+  searchAndFilterProducts,
+  getProductTrend
 }

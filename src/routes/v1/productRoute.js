@@ -16,6 +16,7 @@ Router.route('/')
     productValidation.validate,
     productController.create
   )
+Router.route('/trend-products').get(productController.getProductTrend)
 
 Router.route('/:id')
   .get(productController.getProductById)

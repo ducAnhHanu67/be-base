@@ -601,6 +601,77 @@ const searchAndFilterProducts = async (filters) => {
   }
 }
 
+const getTopTrendingProducts = async () => {
+  try {
+    const products = await Product.findAll({
+      limit: 8,
+      attributes: [
+        'id',
+        'name',
+        'price',
+        'discount',
+        'stock',
+        'description',
+        'coverImageUrl',
+        'dimension',
+        'type',
+        'categoryId',
+        'createdAt',
+        'updatedAt',
+        [
+          Sequelize.literal(`(
+            SELECT COALESCE(SUM(oi.quantity), 0)
+            FROM order_items AS oi
+            WHERE oi.product_id = Product.id
+          )`),
+          'soldQuantity'
+        ]
+      ],
+      order: [[Sequelize.literal('soldQuantity'), 'DESC']],
+      include: [
+        {
+          model: BookDetail,
+          as: 'bookDetail',
+          required: false,
+          attributes: [
+            'bookGenreId',
+            'author',
+            'translator',
+            'language',
+            'publisher',
+            'publishYear',
+            'pageCount'
+          ]
+        },
+        {
+          model: StationeryDetail,
+          as: 'stationeryDetail',
+          required: false,
+          attributes: ['brand', 'placeProduction', 'color', 'material']
+        },
+        {
+          model: Category,
+          as: 'category',
+          required: false,
+          attributes: ['id', 'name']
+        },
+        {
+          model: ProductImage,
+          as: 'productImages',
+          required: false
+        }
+      ]
+    });
+
+    return products;
+  } catch (error) {
+    console.error('🔥 Error in getTopTrendingProducts:', error);
+    throw error;
+  }
+};
+
+
+
 export const productService = {
   create,
   getProducts,
@@ -609,5 +680,6 @@ export const productService = {
   deleteById,
   getCategories,
   getBookGenres,
-  searchAndFilterProducts
+  searchAndFilterProducts,
+  getTopTrendingProducts
 }
