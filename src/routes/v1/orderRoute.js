@@ -45,5 +45,15 @@ Router.route('/admin/:id/status').put(
   orderValidation.updateOrderStatus,
   orderController.updateOrderStatus
 )
+Router.route('/admin/revenue/last-6-months').get(
+  authMiddleware.isAuthorized,
+  authMiddleware.isAdminOrUser,
+  orderController.getRevenueLast6Months
+)
+Router.route('/admin/stats/current-month').get(
+  authMiddleware.isAuthorized,
+  authMiddleware.isAdminOrUser,
+  orderController.getCurrentMonthStats
+)
 
 export const orderRoute = Router

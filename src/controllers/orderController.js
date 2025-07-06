@@ -141,6 +141,33 @@ const updatePaymentStatusByOrderNumber = async (req, res, next) => {
   }
 }
 
+const getRevenueLast6Months = async (req, res, next) => {
+  try {
+    const result = await orderService.getRevenueLast6Months()
+    res.status(200).json({
+      success: true,
+      data: result
+    })
+  } catch (error) {
+    next(error)
+  }
+}
+const getCurrentMonthStats = async (req, res) => {
+  try {
+    const stats = await orderService.getCurrentMonthStats()
+
+    return res.status(200).json({
+      success: true,
+      data: stats
+    })
+  } catch (error) {
+    console.error('Error in getCurrentMonthStats:', error)
+    return res.status(500).json({
+      success: false,
+      message: 'Server error'
+    })
+  }
+}
 export const orderController = {
   createOrder,
   getOrderById,
@@ -150,5 +177,7 @@ export const orderController = {
   getAllOrders,
   getOrderByIdAdmin,
   updateOrderStatus,
-  updatePaymentStatusByOrderNumber
+  updatePaymentStatusByOrderNumber,
+  getRevenueLast6Months,
+  getCurrentMonthStats
 }

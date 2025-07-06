@@ -13,6 +13,7 @@ import Order from './Order'
 import OrderItem from './OrderItem'
 import Review from './Review'
 import Address from './Address'
+import Message from './Message'
 
 Category.hasOne(Product, {
   foreignKey: 'categoryId',
@@ -186,5 +187,6 @@ export {
   Order,
   OrderItem,
   Review,
-  Address
+  Address,
+  Message
 }

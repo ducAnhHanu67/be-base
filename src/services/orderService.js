@@ -589,6 +589,79 @@ const updatePaymentStatusByOrderNumber = async (
   }
 }
 
+const getRevenueLast6Months = async () => {
+  const sixMonthsAgo = new Date()
+  sixMonthsAgo.setMonth(sixMonthsAgo.getMonth() - 5)
+  sixMonthsAgo.setDate(1)
+
+  const revenueData = await Order.findAll({
+    attributes: [
+      [sequelize.fn('DATE_FORMAT', sequelize.col('created_at'), '%Y-%m'), 'month'],
+      [sequelize.fn('SUM', sequelize.col('total_amount')), 'revenue']
+    ],
+    where: {
+      payment_status: 'PAID',
+      created_at: {
+        [Op.gte]: sixMonthsAgo
+      }
+    },
+    group: [sequelize.literal("DATE_FORMAT(created_at, '%Y-%m')")],
+    order: [sequelize.literal("DATE_FORMAT(created_at, '%Y-%m') ASC")]
+  })
+
+  return revenueData.map(row => ({
+    month: row.get('month'),
+    revenue: parseFloat(row.get('revenue'))
+  }))
+}
+const getCurrentMonthStats = async () => {
+  const startOfMonth = new Date(new Date().getFullYear(), new Date().getMonth(), 1)
+  const endOfMonth = new Date(new Date().getFullYear(), new Date().getMonth() + 1, 0, 23, 59, 59, 999)
+
+  const [totalOrders, successOrders, cancelledOrders, revenueData] = await Promise.all([
+    Order.count({
+      where: {
+        created_at: {
+          [Op.between]: [startOfMonth, endOfMonth]
+        }
+      }
+    }),
+    Order.count({
+      where: {
+        payment_status: 'PAID',
+        created_at: {
+          [Op.between]: [startOfMonth, endOfMonth]
+        }
+      }
+    }),
+    Order.count({
+      where: {
+        status: 'CANCELLED',
+        created_at: {
+          [Op.between]: [startOfMonth, endOfMonth]
+        }
+      }
+    }),
+    Order.sum('total_amount', {
+      where: {
+        payment_status: 'PAID',
+        created_at: {
+          [Op.between]: [startOfMonth, endOfMonth]
+        }
+      }
+    })
+  ])
+
+  return {
+    totalOrders,
+    successOrders,
+    cancelledOrders,
+    revenue: revenueData || 0
+  }
+}
+
+
+
 export const orderService = {
   createOrderFromCart,
   getOrderById,
@@ -597,5 +670,7 @@ export const orderService = {
   cancelOrder,
   getAllOrders,
   getOrderByNumber,
-  updatePaymentStatusByOrderNumber
+  updatePaymentStatusByOrderNumber,
+  getRevenueLast6Months,
+  getCurrentMonthStats
 }

@@ -8,6 +8,10 @@ import cookieParser from 'cookie-parser'
 import exitHook from 'async-exit-hook'
 import { APIs_V1 } from '~/routes/v1'
 import { errorHandlingMiddleware } from '~/middlewares/errorHandlingMiddleware'
+import http from 'http'
+import { Server } from 'socket.io'
+import { initSocketServer } from '~/sockets'
+
 
 const START_SERVER = () => {
   const app = express()
@@ -35,7 +39,16 @@ const START_SERVER = () => {
 
   app.use('/images', express.static(path.join(__dirname, '..', 'public', 'images')))
 
-  app.listen(env.APP_PORT, () => {
+  const server = http.createServer(app)
+  const io = new Server(server, {
+    cors: {
+      origin: '*'
+    }
+  })
+
+  initSocketServer(io) // 👉 Gọi logic socket bạn đã viết
+
+  server.listen(env.APP_PORT, () => {
     // eslint-disable-next-line no-console
     console.log(
       `3. Hi ${env.AUTHOR}, Back-end Server is running successfully at ${env.APP_HOST}:${env.APP_PORT}`
@@ -50,16 +63,16 @@ const START_SERVER = () => {
   // })
 }
 
-;(async () => {
-  try {
-    console.log('1. Connecting to MySQL...')
-    await CONNECT_DB()
-    console.log('2. Connected to MySQL')
+  ; (async () => {
+    try {
+      console.log('1. Connecting to MySQL...')
+      await CONNECT_DB()
+      console.log('2. Connected to MySQL')
 
-    // Khởi động server back-end sau khi đã connect database thành công
-    START_SERVER()
-  } catch (error) {
-    console.error(error)
-    process.exit(0)
-  }
-})()
+      // Khởi động server back-end sau khi đã connect database thành công
+      START_SERVER()
+    } catch (error) {
+      console.error(error)
+      process.exit(0)
+    }
+  })()
