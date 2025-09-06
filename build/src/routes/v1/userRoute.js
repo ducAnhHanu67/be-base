@@ -24,6 +24,6 @@ Router.route('/profile/update').put(_authMiddleware.authMiddleware.isAuthorized,
 Router.route('/profile/change-password').put(_authMiddleware.authMiddleware.isAuthorized, _userValidation.userValidation.updatePassword, _userController.userController.updatePassword);
 
 // Admin routes - yêu cầu xác thực và quyền admin
-Router.route('/admin/users').get(_authMiddleware.authMiddleware.isAuthorized, _authMiddleware.authMiddleware.isAdmin, _userController.userController.getAllUsers).post(_authMiddleware.authMiddleware.isAuthorized, _authMiddleware.authMiddleware.isAdmin, _userValidation.userValidation.createUserByAdmin, _userController.userController.createUserByAdmin);
+Router.route('/admin/users').get(_userController.userController.getAllUsers).post(_authMiddleware.authMiddleware.isAuthorized, _authMiddleware.authMiddleware.isAdmin, _userValidation.userValidation.createUserByAdmin, _userController.userController.createUserByAdmin);
 Router.route('/admin/users/:userId').put(_authMiddleware.authMiddleware.isAuthorized, _authMiddleware.authMiddleware.isAdmin, _userValidation.userValidation.validateUserId, _userValidation.userValidation.updateUserByAdmin, _userController.userController.updateUserByAdmin)["delete"](_authMiddleware.authMiddleware.isAuthorized, _authMiddleware.authMiddleware.isAdmin, _userValidation.userValidation.validateUserId, _userController.userController.deleteUser);
 var userRoute = exports.userRoute = Router;
