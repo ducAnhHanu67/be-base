@@ -10,7 +10,7 @@
   "scripts": {
     "lint": "eslint src --ext js --report-unused-disable-directives --max-warnings 0",
     "format": "prettier --write .",
-    "clean": "rm -rf build && mkdir build",
+    "clean": "rimraf build && mkdir build",
     "build-babel": "babel ./src -d ./build/src",
     "build": "npm run clean && npm run build-babel",
     "production": "npm run build && node ./build/src/server.js",
@@ -62,6 +62,7 @@
     "eslint-config-prettier": "^10.1.1",
     "globals": "^15.15.0",
     "nodemon": "^3.1.9",
-    "prettier": "^3.5.3"
+    "prettier": "^3.5.3",
+    "rimraf": "^6.0.1"
   }
 }
