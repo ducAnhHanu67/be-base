@@ -18,7 +18,7 @@ Router.get('/status', async (req, res) => {
     const [results] = await db.sequelize.query('SELECT COUNT(*) AS totalUsers FROM users')
 
     res.status(200).json({
-      message: 'APIs V1 are ready to use.',
+      message: 'APIs V1 are ready to use. ch',
       dbStatus: 'Connected OK',
       totalUsers: results[0].totalUsers
     })

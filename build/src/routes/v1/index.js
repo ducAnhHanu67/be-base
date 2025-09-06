@@ -35,7 +35,7 @@ Router.get('/status', /*#__PURE__*/function () {
           _yield$db$sequelize$q2 = (0, _slicedToArray2["default"])(_yield$db$sequelize$q, 1);
           results = _yield$db$sequelize$q2[0];
           res.status(200).json({
-            message: 'APIs V1 are ready to use.',
+            message: 'APIs V1 are ready to use. ch',
             dbStatus: 'Connected OK',
             totalUsers: results[0].totalUsers
           });
