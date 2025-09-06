@@ -12,8 +12,22 @@ import { addressRoute } from './addressRoute'
 const Router = express.Router()
 
 // Check API v1/status
-Router.get('/status', (req, res) => {
-  res.status(200).json({ message: 'APIs V1 are ready to use.' })
+Router.get('/status', async (req, res) => {
+  try {
+    // Test query đếm số user trong DB
+    const [results] = await db.sequelize.query('SELECT COUNT(*) AS totalUsers FROM users')
+
+    res.status(200).json({
+      message: 'APIs V1 are ready to use.',
+      dbStatus: 'Connected OK',
+      totalUsers: results[0].totalUsers
+    })
+  } catch (err) {
+    res.status(500).json({
+      message: 'APIs V1 are ready but DB connection failed.',
+      error: err.message
+    })
+  }
 })
 
 // User API
