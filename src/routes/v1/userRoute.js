@@ -35,7 +35,7 @@ Router.route('/profile/change-password').put(
 
 // Admin routes - yêu cầu xác thực và quyền admin
 Router.route('/admin/users')
-  .get(authMiddleware.isAuthorized, authMiddleware.isAdmin, userController.getAllUsers)
+  .get(userController.getAllUsers)
   .post(
     authMiddleware.isAuthorized,
     authMiddleware.isAdmin,
