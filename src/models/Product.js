@@ -20,7 +20,7 @@ Product.init(
     },
     categoryId: {
       allowNull: false,
-      type: DataTypes.BIGINT
+      type: DataTypes.BIGINT,
     },
     name: {
       allowNull: false,

@@ -1,6 +1,7 @@
 import { Sequelize, Op } from 'sequelize'
 import sequelize from '~/config/mySQL'
-import { BookDetail, StationeryDetail, Product, ProductImage, BookGenre, Category, Review } from '~/models'
+import { BookDetail, StationeryDetail, Product, ProductImage, BookGenre, Category, Review, FlashSale } from '~/models'
+import ProductHighlight from '~/models/ProductHighlight'
 import { UploadImageProvider } from '~/providers/UploadImageProvider'
 import ApiError from '~/utils/ApiError'
 import { DEFAULT_PAGE, DEFAULT_ITEMS_PER_PAGE } from '~/utils/constants'
@@ -76,6 +77,78 @@ const getProducts = async (page, itemsPerPage, queryFilter) => {
     throw error
   }
 }
+const getProductsByCategory = async (categoryId, limit = 10) => {
+  try {
+    console.log(categoryId, limit, 'ctt');
+
+    const products = await Product.findAll({
+      where: { categoryId: parseInt(categoryId, 10) },
+      order: [['updatedAt', 'DESC']],
+      limit: parseInt(limit, 10), // thêm dòng này để giới hạn số record
+      attributes: [
+        'id', 'name', 'price', 'discount', 'stock',
+        'description', 'coverImageUrl', 'dimension',
+        'type', 'categoryId', 'createdAt', 'updatedAt'
+      ],
+      include: [
+        { model: Category, as: 'category', attributes: ['id', 'name'] },
+        { model: ProductImage, as: 'productImages', required: false }
+      ]
+    });
+
+    return products;
+  } catch (error) {
+    throw error;
+  }
+};
+
+
+const getFlashSaleProducts = async () => {
+  try {
+    const now = new Date();
+
+    const flashSaleProducts = await FlashSale.findAll({
+      where: {
+        startTime: { [Op.lte]: now },
+        endTime: { [Op.gte]: now }
+      },
+      attributes: ['id', 'flashPrice', 'startTime', 'endTime'],
+      include: [
+        {
+          model: Product,
+          as: 'product',
+          attributes: [
+            'id',
+            'name',
+            'price',
+            'discount',
+            'stock',
+            'description',
+            'coverImageUrl',
+            'dimension',
+            'type',
+            'categoryId',
+            'createdAt',
+            'updatedAt'
+          ],
+          include: [
+            { model: Category, as: 'category', attributes: ['id', 'name'] },
+            { model: ProductImage, as: 'productImages', required: false },
+            { model: BookDetail, as: 'bookDetail', required: false },
+            { model: StationeryDetail, as: 'stationeryDetail', required: false }
+          ]
+        }
+      ],
+      order: [['startTime', 'ASC']]
+    });
+
+    return flashSaleProducts;
+  } catch (error) {
+    console.error('🔥 Error in getFlashSaleProducts:', error);
+    throw error;
+  }
+};
+
 
 const getProductById = async (productId) => {
   try {
@@ -153,7 +226,10 @@ const create = async (reqBody, productFile) => {
   try {
     const existProduct = await Product.findOne({
       attributes: ['name'],
-      where: Sequelize.where(Sequelize.fn('LOWER', Sequelize.col('name')), reqBody.name.toLowerCase()),
+      where: Sequelize.where(
+        Sequelize.fn('LOWER', Sequelize.col('name')),
+        reqBody.name.toLowerCase()
+      ),
       raw: true
     })
     if (existProduct) throw new ApiError(409, 'Sản phẩm đã tồn tại!')
@@ -165,10 +241,14 @@ const create = async (reqBody, productFile) => {
     )
 
     const product = await sequelize.transaction(async (t) => {
-      // Tạo mảng include động
-      const include = [{ model: ProductImage, as: 'productImages' }]
+      const include = [
+        { model: ProductImage, as: 'productImages' },
+        { model: ProductHighlight, as: 'highlights' }
 
-      // Chuẩn bị data chính
+      ]
+      const highlightEntries = reqBody.highlights
+        ? Object.entries(reqBody.highlights).map(([key, value]) => ({ key, value }))
+        : []
       const data = {
         categoryId: reqBody.categoryId,
         name: reqBody.name,
@@ -179,47 +259,57 @@ const create = async (reqBody, productFile) => {
         coverImageUrl: uploadResult.fileUrl,
         dimension: reqBody.dimension,
         type: reqBody.type,
-        // chung productImages
-        productImages: (reqBody.productImages || []).map((i) => ({ imageUrl: i.imageUrl }))
+        productImages: (reqBody.productImages || []).map((i) => ({ imageUrl: i.imageUrl })),
       }
 
-      // Nếu là sách thì đóng gói bookDetail và include model
       if (reqBody.type === 'BOOK') {
-        data.bookDetail = {
-          bookGenreId: reqBody.bookDetail.bookGenreId,
-          author: reqBody.bookDetail.author,
-          translator: reqBody.bookDetail.translator,
-          language: reqBody.bookDetail.language,
-          publisher: reqBody.bookDetail.publisher,
-          publishYear: reqBody.bookDetail.publishYear,
-          pageCount: reqBody.bookDetail.pageCount
-        }
+        data.bookDetail = { ...reqBody.bookDetail }
         include.push({ model: BookDetail, as: 'bookDetail' })
       }
 
-      // Nếu là văn phòng phẩm thì đóng gói stationeryDetail và include model
       if (reqBody.type === 'STATIONERY') {
-        data.stationeryDetail = {
-          brand: reqBody.stationeryDetail.brand,
-          placeProduction: reqBody.stationeryDetail.placeProduction,
-          color: reqBody.stationeryDetail.color,
-          material: reqBody.stationeryDetail.material
-          // … thêm các field khác nếu có
-        }
+        data.stationeryDetail = { ...reqBody.stationeryDetail }
         include.push({ model: StationeryDetail, as: 'stationeryDetail' })
       }
 
-      // Cuối cùng tạo record
-      return Product.create(data, {
-        include,
-        transaction: t
-      })
+
+
+      // Tạo sản phẩm chính
+      const newProduct = await Product.create(data, { include, transaction: t })
+
+      if (highlightEntries.length > 0) {
+        await ProductHighlight.bulkCreate(
+          highlightEntries.map((h) => ({
+            productId: newProduct.id,
+            key: h.key,
+            value: h.value
+          })),
+          { transaction: t }
+        )
+      }
+
+      // Nếu có flash sale thì thêm record vào bảng flashsales
+      if (reqBody.flashSale) {
+        await FlashSale.create(
+          {
+            productId: newProduct.id,
+            flashPrice: reqBody.flashSale.flashPrice,
+            startTime: reqBody.flashSale.startTime,
+            endTime: reqBody.flashSale.endTime
+          },
+          { transaction: t }
+        )
+      }
+
+      return newProduct
     })
+
     return product
   } catch (error) {
     throw error
   }
 }
+
 
 const update = async (productId, reqBody, productFile) => {
   try {
@@ -681,5 +771,7 @@ export const productService = {
   getCategories,
   getBookGenres,
   searchAndFilterProducts,
-  getTopTrendingProducts
+  getTopTrendingProducts,
+  getFlashSaleProducts,
+  getProductsByCategory
 }

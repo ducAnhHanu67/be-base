@@ -5,6 +5,7 @@ import { env } from '~/config/environment'
 const sequelize = new Sequelize(env.DATABASE_NAME, 'root', env.DATABASE_PASSWORD, {
   host: env.APP_HOST,
   port: env.DATABASE_PORT,
+  logging: false,
   dialect: 'mysql',
   timezone: '+07:00',
   dialectOptions: {

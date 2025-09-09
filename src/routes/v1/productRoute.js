@@ -18,6 +18,12 @@ Router.route('/')
   )
 Router.route('/trend-products').get(productController.getProductTrend)
 
+Router.route('/flash-sales').get(productController.getFlashSales)
+
+Router.route('/category')
+  .get(productController.getProductsByCategory)
+
+
 Router.route('/:id')
   .get(productController.getProductById)
   .put(

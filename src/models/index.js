@@ -1,5 +1,6 @@
 // src/models/index.js (hoặc nơi bạn định nghĩa associations)
 import Category from './Category'
+import FlashSale from './FlashSale'
 import BookGenre from './BookGenre'
 import Product from './Product'
 import BookDetail from './BookDetail'
@@ -14,13 +15,14 @@ import OrderItem from './OrderItem'
 import Review from './Review'
 import Address from './Address'
 import Message from './Message'
+import ProductHighlight from './ProductHighlight'
 
 Category.hasOne(Product, {
   foreignKey: 'categoryId',
   as: 'product' // ← alias phải trùng với include bên dưới
 })
 Product.belongsTo(Category, {
-  foreignKey: 'categoryId',
+  foreignKey: 'category_id',
   as: 'category'
 })
 
@@ -172,6 +174,19 @@ Address.belongsTo(User, {
   foreignKey: 'userId',
   as: 'user'
 })
+// Product ↔ FlashSale (1-1)
+Product.hasOne(FlashSale, {
+  foreignKey: 'productId',
+  as: 'flashSale'
+})
+FlashSale.belongsTo(Product, {
+  foreignKey: 'productId',
+  as: 'product'
+})
+Product.hasMany(ProductHighlight, { as: 'highlights', foreignKey: 'productId' })
+ProductHighlight.belongsTo(Product, { foreignKey: 'productId' })
+
+
 
 export {
   Category,
@@ -188,5 +203,7 @@ export {
   OrderItem,
   Review,
   Address,
-  Message
+  Message,
+  FlashSale,
+  ProductHighlight
 }

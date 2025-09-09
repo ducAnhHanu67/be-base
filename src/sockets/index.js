@@ -9,14 +9,12 @@ let adminSockets = [];   // Danh sách socket của admin
 
 export const initSocketServer = (io) => {
     io.on('connection', (socket) => {
-        console.log('✅ New socket connected:', socket.id)
 
         // 🔹 Admin kết nối
         socket.on('adminConnect', () => {
             socket.role = 'admin'
             adminSockets.push(socket)
             socket.join('admin')
-            console.log('📥 Admin connected')
             io.emit('userList', users)
         })
 
@@ -73,7 +71,6 @@ export const initSocketServer = (io) => {
 
         // 🔹 Ngắt kết nối
         socket.on('disconnect', () => {
-            console.log('❌ Socket disconnected:', socket.id)
             users = users.filter(u => u.id !== socket.id)
             adminSockets = adminSockets.filter(adminSocket => adminSocket.id !== socket.id)
 

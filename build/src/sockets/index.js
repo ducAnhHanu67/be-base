@@ -15,14 +15,14 @@ var adminSockets = []; // Danh sách socket của admin
 
 var initSocketServer = exports.initSocketServer = function initSocketServer(io) {
   io.on('connection', function (socket) {
-    console.log('✅ New socket connected:', socket.id);
+
 
     // 🔹 Admin kết nối
     socket.on('adminConnect', function () {
       socket.role = 'admin';
       adminSockets.push(socket);
       socket.join('admin');
-      console.log('📥 Admin connected');
+
       io.emit('userList', users);
     });
 

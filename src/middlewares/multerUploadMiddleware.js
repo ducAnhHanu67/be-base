@@ -8,8 +8,7 @@ import ApiError from '~/utils/ApiError'
  */
 // Function kiểm tra loại file nào được chấp nhận
 const customFileFilter = (req, file, callback) => {
-  console.log('Multer file: ', file)
-  console.log('first')
+
 
   // Đối với multer kiểm tra kiểu file sử dụng mimetype
   if (!ALLOW_COMMON_FILE_TYPES.includes(file.mimetype)) {

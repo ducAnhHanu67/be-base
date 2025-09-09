@@ -2,8 +2,6 @@ import { productService } from '~/services/productService'
 
 const create = async (req, res, next) => {
   try {
-    console.log(req.body)
-    console.log(req.file)
     const productFile = req.file
     const createProduct = await productService.create(req.body, productFile)
     res.status(201).json(createProduct)
@@ -102,6 +100,28 @@ const getProductTrend = async (req, res, next) => {
     next(error)
   }
 }
+const getFlashSales = async (req, res, next) => {
+  try {
+    const flashSales = await productService.getFlashSaleProducts()
+    res.status(200).json({ success: true, data: flashSales })
+  } catch (error) {
+    next(error)
+  }
+}
+const getProductsByCategory = async (req, res, next) => {
+  try {
+    const { categoryId, limit } = req.query
+
+    console.log(limit, 'CATE');
+
+
+    const products = await productService.getProductsByCategory(categoryId, limit || 5)
+    res.status(200).json({ success: true, data: products })
+  } catch (error) {
+    next(error)
+  }
+}
+
 
 
 export const productController = {
@@ -113,5 +133,7 @@ export const productController = {
   getCategories,
   getBookGenres,
   searchAndFilterProducts,
-  getProductTrend
+  getProductTrend,
+  getFlashSales,
+  getProductsByCategory
 }

@@ -34,6 +34,11 @@ const validate = async (req, res, next) => {
     color: Joi.string().allow('').min(1).max(50).trim(),
     material: Joi.string().allow('').min(1).max(50).trim()
   }
+  const flashSaleFields = {
+    flashPrice: Joi.number().positive().required(),
+    startTime: Joi.date().required(),
+    endTime: Joi.date().required()
+  }
 
   const productSchema = Joi.object({
     ...productFields,
@@ -46,7 +51,10 @@ const validate = async (req, res, next) => {
       is: 'STATIONERY',
       then: Joi.object(stationeryFields).required(),
       otherwise: Joi.forbidden()
-    })
+    }),
+    flashSale: Joi.object(flashSaleFields).optional(),
+    highlights: Joi.object().pattern(Joi.string(), Joi.string()).optional()
+
   })
 
   try {
