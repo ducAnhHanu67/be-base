@@ -83,6 +83,18 @@ const getProducts = async (page, itemsPerPage, queryFilter) => {
     throw error
   }
 }
+const getProductSuggest = async (keyword) => {
+  try {
+    const products = await Product.findAll({
+      where: { name: { [Op.like]: `%${keyword}%` } },
+      attributes: ['id', 'name', 'price', 'coverImageUrl'],
+      limit: 8
+    })
+    return products
+  } catch (err) {
+    throw err
+  }
+}
 const getProductsByCategory = async (categoryId, limit = 10) => {
   try {
     const products = await Product.findAll({
@@ -779,5 +791,6 @@ export const productService = {
   searchAndFilterProducts,
   getTopTrendingProducts,
   getFlashSaleProducts,
-  getProductsByCategory
+  getProductsByCategory,
+  getProductSuggest
 }

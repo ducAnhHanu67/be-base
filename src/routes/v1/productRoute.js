@@ -23,6 +23,7 @@ Router.route('/flash-sales').get(productController.getFlashSales)
 Router.route('/category')
   .get(productController.getProductsByCategory)
 
+Router.route('/suggest').get(productController.getProductSuggest)
 
 Router.route('/:id')
   .get(productController.getProductById)

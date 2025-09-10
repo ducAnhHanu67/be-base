@@ -117,6 +117,16 @@ const getProductsByCategory = async (req, res, next) => {
     next(error)
   }
 }
+const getProductSuggest = async (req, res, next) => {
+  try {
+    const { keyword } = req.query
+
+    const products = await productService.getProductSuggest(keyword)
+    res.status(200).json({ success: true, data: products })
+  } catch (error) {
+    next(error)
+  }
+}
 
 
 
@@ -131,5 +141,6 @@ export const productController = {
   searchAndFilterProducts,
   getProductTrend,
   getFlashSales,
-  getProductsByCategory
+  getProductsByCategory,
+  getProductSuggest
 }
