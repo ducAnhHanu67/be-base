@@ -14,7 +14,7 @@ function ownKeys(e, r) { var t = Object.keys(e); if (Object.getOwnPropertySymbol
 function _objectSpread(e) { for (var r = 1; r < arguments.length; r++) { var t = null != arguments[r] ? arguments[r] : {}; r % 2 ? ownKeys(Object(t), !0).forEach(function (r) { (0, _defineProperty2["default"])(e, r, t[r]); }) : Object.getOwnPropertyDescriptors ? Object.defineProperties(e, Object.getOwnPropertyDescriptors(t)) : ownKeys(Object(t)).forEach(function (r) { Object.defineProperty(e, r, Object.getOwnPropertyDescriptor(t, r)); }); } return e; }
 var validate = /*#__PURE__*/function () {
   var _ref = (0, _asyncToGenerator2["default"])(/*#__PURE__*/_regenerator["default"].mark(function _callee(req, res, next) {
-    var productFields, bookFields, stationeryFields, productSchema, validated;
+    var productFields, bookFields, stationeryFields, flashSaleFields, productSchema, validated;
     return _regenerator["default"].wrap(function _callee$(_context) {
       while (1) switch (_context.prev = _context.next) {
         case 0:
@@ -50,6 +50,11 @@ var validate = /*#__PURE__*/function () {
             color: _joi["default"].string().allow('').min(1).max(50).trim(),
             material: _joi["default"].string().allow('').min(1).max(50).trim()
           };
+          flashSaleFields = {
+            flashPrice: _joi["default"].number().positive().required(),
+            startTime: _joi["default"].date().required(),
+            endTime: _joi["default"].date().required()
+          };
           productSchema = _joi["default"].object(_objectSpread(_objectSpread({}, productFields), {}, {
             bookDetail: _joi["default"].alternatives().conditional('type', {
               is: 'BOOK',
@@ -60,30 +65,32 @@ var validate = /*#__PURE__*/function () {
               is: 'STATIONERY',
               then: _joi["default"].object(stationeryFields).required(),
               otherwise: _joi["default"].forbidden()
-            })
+            }),
+            flashSale: _joi["default"].object(flashSaleFields).optional(),
+            highlights: _joi["default"].object().pattern(_joi["default"].string(), _joi["default"].string()).optional()
           }));
-          _context.prev = 4;
-          _context.next = 7;
+          _context.prev = 5;
+          _context.next = 8;
           return productSchema.validateAsync(req.body, {
             convert: true,
             abortEarly: false,
             allowUnknown: false
           });
-        case 7:
+        case 8:
           validated = _context.sent;
           req.body = validated;
           next();
-          _context.next = 15;
+          _context.next = 16;
           break;
-        case 12:
-          _context.prev = 12;
-          _context.t0 = _context["catch"](4);
+        case 13:
+          _context.prev = 13;
+          _context.t0 = _context["catch"](5);
           next(new _ApiError["default"](422, new Error(_context.t0).message));
-        case 15:
+        case 16:
         case "end":
           return _context.stop();
       }
-    }, _callee, null, [[4, 12]]);
+    }, _callee, null, [[5, 13]]);
   }));
   return function validate(_x, _x2, _x3) {
     return _ref.apply(this, arguments);

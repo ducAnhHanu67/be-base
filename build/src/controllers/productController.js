@@ -15,25 +15,23 @@ var create = /*#__PURE__*/function () {
       while (1) switch (_context.prev = _context.next) {
         case 0:
           _context.prev = 0;
-          console.log(req.body);
-          console.log(req.file);
           productFile = req.file;
-          _context.next = 6;
+          _context.next = 4;
           return _productService.productService.create(req.body, productFile);
-        case 6:
+        case 4:
           createProduct = _context.sent;
           res.status(201).json(createProduct);
-          _context.next = 13;
+          _context.next = 11;
           break;
-        case 10:
-          _context.prev = 10;
+        case 8:
+          _context.prev = 8;
           _context.t0 = _context["catch"](0);
           next(_context.t0);
-        case 13:
+        case 11:
         case "end":
           return _context.stop();
       }
-    }, _callee, null, [[0, 10]]);
+    }, _callee, null, [[0, 8]]);
   }));
   return function create(_x, _x2, _x3) {
     return _ref.apply(this, arguments);
@@ -284,6 +282,101 @@ var getProductTrend = /*#__PURE__*/function () {
     return _ref9.apply(this, arguments);
   };
 }();
+var getFlashSales = /*#__PURE__*/function () {
+  var _ref10 = (0, _asyncToGenerator2["default"])(/*#__PURE__*/_regenerator["default"].mark(function _callee10(req, res, next) {
+    var flashSales;
+    return _regenerator["default"].wrap(function _callee10$(_context10) {
+      while (1) switch (_context10.prev = _context10.next) {
+        case 0:
+          _context10.prev = 0;
+          _context10.next = 3;
+          return _productService.productService.getFlashSaleProducts();
+        case 3:
+          flashSales = _context10.sent;
+          res.status(200).json({
+            success: true,
+            data: flashSales
+          });
+          _context10.next = 10;
+          break;
+        case 7:
+          _context10.prev = 7;
+          _context10.t0 = _context10["catch"](0);
+          next(_context10.t0);
+        case 10:
+        case "end":
+          return _context10.stop();
+      }
+    }, _callee10, null, [[0, 7]]);
+  }));
+  return function getFlashSales(_x28, _x29, _x30) {
+    return _ref10.apply(this, arguments);
+  };
+}();
+var getProductsByCategory = /*#__PURE__*/function () {
+  var _ref11 = (0, _asyncToGenerator2["default"])(/*#__PURE__*/_regenerator["default"].mark(function _callee11(req, res, next) {
+    var _req$query2, categoryId, limit, products;
+    return _regenerator["default"].wrap(function _callee11$(_context11) {
+      while (1) switch (_context11.prev = _context11.next) {
+        case 0:
+          _context11.prev = 0;
+          _req$query2 = req.query, categoryId = _req$query2.categoryId, limit = _req$query2.limit;
+          _context11.next = 4;
+          return _productService.productService.getProductsByCategory(categoryId, limit || 5);
+        case 4:
+          products = _context11.sent;
+          res.status(200).json({
+            success: true,
+            data: products
+          });
+          _context11.next = 11;
+          break;
+        case 8:
+          _context11.prev = 8;
+          _context11.t0 = _context11["catch"](0);
+          next(_context11.t0);
+        case 11:
+        case "end":
+          return _context11.stop();
+      }
+    }, _callee11, null, [[0, 8]]);
+  }));
+  return function getProductsByCategory(_x31, _x32, _x33) {
+    return _ref11.apply(this, arguments);
+  };
+}();
+var getProductSuggest = /*#__PURE__*/function () {
+  var _ref12 = (0, _asyncToGenerator2["default"])(/*#__PURE__*/_regenerator["default"].mark(function _callee12(req, res, next) {
+    var keyword, products;
+    return _regenerator["default"].wrap(function _callee12$(_context12) {
+      while (1) switch (_context12.prev = _context12.next) {
+        case 0:
+          _context12.prev = 0;
+          keyword = req.query.keyword;
+          _context12.next = 4;
+          return _productService.productService.getProductSuggest(keyword);
+        case 4:
+          products = _context12.sent;
+          res.status(200).json({
+            success: true,
+            data: products
+          });
+          _context12.next = 11;
+          break;
+        case 8:
+          _context12.prev = 8;
+          _context12.t0 = _context12["catch"](0);
+          next(_context12.t0);
+        case 11:
+        case "end":
+          return _context12.stop();
+      }
+    }, _callee12, null, [[0, 8]]);
+  }));
+  return function getProductSuggest(_x34, _x35, _x36) {
+    return _ref12.apply(this, arguments);
+  };
+}();
 var productController = exports.productController = {
   create: create,
   getProducts: getProducts,
@@ -293,5 +386,8 @@ var productController = exports.productController = {
   getCategories: getCategories,
   getBookGenres: getBookGenres,
   searchAndFilterProducts: searchAndFilterProducts,
-  getProductTrend: getProductTrend
+  getProductTrend: getProductTrend,
+  getFlashSales: getFlashSales,
+  getProductsByCategory: getProductsByCategory,
+  getProductSuggest: getProductSuggest
 };

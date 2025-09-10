@@ -14,9 +14,6 @@ var _ApiError = _interopRequireDefault(require("../utils/ApiError"));
  */
 // Function kiểm tra loại file nào được chấp nhận
 var customFileFilter = function customFileFilter(req, file, callback) {
-  console.log('Multer file: ', file);
-  console.log('first');
-
   // Đối với multer kiểm tra kiểu file sử dụng mimetype
   if (!_validators.ALLOW_COMMON_FILE_TYPES.includes(file.mimetype)) {
     var errMessage = 'File type is invalid. Only accept jpg, jpeg and png';

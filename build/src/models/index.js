@@ -46,6 +46,12 @@ Object.defineProperty(exports, "Coupon", {
     return _Coupon["default"];
   }
 });
+Object.defineProperty(exports, "FlashSale", {
+  enumerable: true,
+  get: function get() {
+    return _FlashSale["default"];
+  }
+});
 Object.defineProperty(exports, "Message", {
   enumerable: true,
   get: function get() {
@@ -68,6 +74,12 @@ Object.defineProperty(exports, "Product", {
   enumerable: true,
   get: function get() {
     return _Product["default"];
+  }
+});
+Object.defineProperty(exports, "ProductHighlight", {
+  enumerable: true,
+  get: function get() {
+    return _ProductHighlight["default"];
   }
 });
 Object.defineProperty(exports, "ProductImage", {
@@ -95,6 +107,7 @@ Object.defineProperty(exports, "User", {
   }
 });
 var _Category = _interopRequireDefault(require("./Category"));
+var _FlashSale = _interopRequireDefault(require("./FlashSale"));
 var _BookGenre = _interopRequireDefault(require("./BookGenre"));
 var _Product = _interopRequireDefault(require("./Product"));
 var _BookDetail = _interopRequireDefault(require("./BookDetail"));
@@ -109,6 +122,7 @@ var _OrderItem = _interopRequireDefault(require("./OrderItem"));
 var _Review = _interopRequireDefault(require("./Review"));
 var _Address = _interopRequireDefault(require("./Address"));
 var _Message = _interopRequireDefault(require("./Message"));
+var _ProductHighlight = _interopRequireDefault(require("./ProductHighlight"));
 // src/models/index.js (hoặc nơi bạn định nghĩa associations)
 
 _Category["default"].hasOne(_Product["default"], {
@@ -116,7 +130,7 @@ _Category["default"].hasOne(_Product["default"], {
   as: 'product' // ← alias phải trùng với include bên dưới
 });
 _Product["default"].belongsTo(_Category["default"], {
-  foreignKey: 'categoryId',
+  foreignKey: 'category_id',
   as: 'category'
 });
 
@@ -266,4 +280,20 @@ _User["default"].hasMany(_Address["default"], {
 _Address["default"].belongsTo(_User["default"], {
   foreignKey: 'userId',
   as: 'user'
+});
+// Product ↔ FlashSale (1-1)
+_Product["default"].hasOne(_FlashSale["default"], {
+  foreignKey: 'productId',
+  as: 'flashSale'
+});
+_FlashSale["default"].belongsTo(_Product["default"], {
+  foreignKey: 'productId',
+  as: 'product'
+});
+_Product["default"].hasMany(_ProductHighlight["default"], {
+  as: 'highlights',
+  foreignKey: 'productId'
+});
+_ProductHighlight["default"].belongsTo(_Product["default"], {
+  foreignKey: 'productId'
 });
