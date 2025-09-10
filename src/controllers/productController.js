@@ -111,10 +111,6 @@ const getFlashSales = async (req, res, next) => {
 const getProductsByCategory = async (req, res, next) => {
   try {
     const { categoryId, limit } = req.query
-
-    console.log(limit, 'CATE');
-
-
     const products = await productService.getProductsByCategory(categoryId, limit || 5)
     res.status(200).json({ success: true, data: products })
   } catch (error) {

@@ -68,6 +68,12 @@ const getProducts = async (page, itemsPerPage, queryFilter) => {
           model: ProductImage,
           as: 'productImages',
           required: false
+        },
+        {
+          model: ProductHighlight,
+          as: 'highlights',
+          required: false,
+          attributes: ['id', 'key', 'value']
         }
       ]
     })
@@ -79,8 +85,6 @@ const getProducts = async (page, itemsPerPage, queryFilter) => {
 }
 const getProductsByCategory = async (categoryId, limit = 10) => {
   try {
-    console.log(categoryId, limit, 'ctt');
-
     const products = await Product.findAll({
       where: { categoryId: parseInt(categoryId, 10) },
       order: [['updatedAt', 'DESC']],
@@ -167,10 +171,6 @@ const getProductById = async (productId) => {
         'categoryId',
         'createdAt',
         'updatedAt'
-        // Tính rating trung bình từ reviews
-        // [sequelize.fn('COALESCE', sequelize.fn('AVG', sequelize.col('reviews.rating')), 0), 'avgRating'],
-        // Đếm số lượng reviews
-        // [sequelize.fn('COUNT', sequelize.col('reviews.id')), 'totalReviews']
       ],
       include: [
         {
@@ -211,6 +211,12 @@ const getProductById = async (productId) => {
           as: 'reviews',
           required: false,
           attributes: []
+        },
+        {
+          model: ProductHighlight,
+          as: 'highlights',
+          required: false,
+          attributes: ['id', 'key', 'value']
         }
       ],
       // group: ['Product.id'],
