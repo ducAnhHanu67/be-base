@@ -76,7 +76,8 @@ const START_SERVER = () => {
       console.log('1. Connecting to MySQL...')
       console.log("DEBUG ENV:", {
         user: process.env.LOCAL_DATABASE_USER,
-        pass: process.env.LOCAL_DATABASE_PASSWORD
+        pass: process.env.LOCAL_DATABASE_PASSWORD,
+
       })
       await CONNECT_DB()
       console.log('2. Connected to MySQL')

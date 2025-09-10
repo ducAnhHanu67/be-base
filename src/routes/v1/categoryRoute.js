@@ -15,6 +15,3 @@ Router.route('/:id')
   .delete(categoryController.deleteById)
 
 export const categoryRoute = Router
-
-
-cd / home / nhrobzuz / repositories / be - base
