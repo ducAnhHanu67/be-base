@@ -10,9 +10,9 @@ var _asyncToGenerator2 = _interopRequireDefault(require("@babel/runtime/helpers/
 var _sequelize = require("sequelize");
 var _environment = require("./environment");
 // Tạo đối tượng Sequelize
-var sequelize = new _sequelize.Sequelize(_environment.env.DATABASE_NAME, _environment.env.DATABASE_USER, _environment.env.DATABASE_PASSWORD, {
-  host: _environment.env.DATABASE_HOST,
-  port: _environment.env.DATABASE_PORT,
+var sequelize = new _sequelize.Sequelize('nhrobzuz_robot', 'nhrobzuz_robot', 'Duc@nh123', {
+  host: 'localhost',
+  port: 3306,
   dialect: 'mysql',
   logging: false,
   timezone: '+07:00',

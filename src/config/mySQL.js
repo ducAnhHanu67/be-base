@@ -4,12 +4,12 @@ import { env } from '~/config/environment'
 
 // Tạo đối tượng Sequelize
 const sequelize = new Sequelize(
-  env.DATABASE_NAME,
-  env.DATABASE_USER,
-  env.DATABASE_PASSWORD,
+  'nhrobzuz_robot',
+  'nhrobzuz_robot',
+  'Duc@nh123',
   {
-    host: env.DATABASE_HOST,
-    port: env.DATABASE_PORT,
+    host: 'localhost',
+    port: 3306,
     dialect: 'mysql',
     logging: false,
     timezone: '+07:00',
