@@ -3,6 +3,7 @@
 var _interopRequireDefault = require("@babel/runtime/helpers/interopRequireDefault");
 var _regenerator = _interopRequireDefault(require("@babel/runtime/regenerator"));
 var _asyncToGenerator2 = _interopRequireDefault(require("@babel/runtime/helpers/asyncToGenerator"));
+require("dotenv/config");
 var _express = _interopRequireDefault(require("express"));
 var _path = _interopRequireDefault(require("path"));
 var _environment = require("./config/environment");
@@ -70,23 +71,27 @@ var START_SERVER = function START_SERVER() {
       case 0:
         _context.prev = 0;
         console.log('1. Connecting to MySQL...');
-        _context.next = 4;
+        console.log("DEBUG ENV:", {
+          user: process.env.LOCAL_DATABASE_USER,
+          pass: process.env.LOCAL_DATABASE_PASSWORD
+        });
+        _context.next = 5;
         return (0, _mySQL.CONNECT_DB)();
-      case 4:
+      case 5:
         console.log('2. Connected to MySQL');
 
         // Khởi động server back-end sau khi đã connect database thành công
         START_SERVER();
-        _context.next = 12;
+        _context.next = 13;
         break;
-      case 8:
-        _context.prev = 8;
+      case 9:
+        _context.prev = 9;
         _context.t0 = _context["catch"](0);
         console.error(_context.t0);
         process.exit(0);
-      case 12:
+      case 13:
       case "end":
         return _context.stop();
     }
-  }, _callee, null, [[0, 8]]);
+  }, _callee, null, [[0, 9]]);
 }))();
