@@ -20,7 +20,7 @@ var Router = _express["default"].Router();
 // Check API v1/status
 Router.get('/status', function (req, res) {
   res.status(200).json({
-    message: 'APIs V1 are ready to use.'
+    message: 'APIs V1 are ready to use. dau lam day'
   });
 });
 
