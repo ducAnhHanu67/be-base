@@ -15,8 +15,5 @@ Router.route('/book-genres').get(_productController.productController.getBookGen
 Router.route('/search').get(_productValidation.productValidation.validateSearch, _productController.productController.searchAndFilterProducts);
 Router.route('/').get(_productController.productController.getProducts).post(_multerUploadMiddleware.multerUploadMiddleware.upload.single('coverImageUrl'), _productValidation.productValidation.validate, _productController.productController.create);
 Router.route('/trend-products').get(_productController.productController.getProductTrend);
-Router.route('/flash-sales').get(_productController.productController.getFlashSales);
-Router.route('/category').get(_productController.productController.getProductsByCategory);
-Router.route('/suggest').get(_productController.productController.getProductSuggest);
 Router.route('/:id').get(_productController.productController.getProductById).put(_multerUploadMiddleware.multerUploadMiddleware.upload.single('coverImageUrl'), _productValidation.productValidation.validate, _productController.productController.update)["delete"](_productController.productController.deleteById);
 var productRoute = exports.productRoute = Router;

@@ -15,11 +15,14 @@ var adminSockets = []; // Danh sách socket của admin
 
 var initSocketServer = exports.initSocketServer = function initSocketServer(io) {
   io.on('connection', function (socket) {
+
+
     // 🔹 Admin kết nối
     socket.on('adminConnect', function () {
       socket.role = 'admin';
       adminSockets.push(socket);
       socket.join('admin');
+
       io.emit('userList', users);
     });
 
@@ -120,6 +123,7 @@ var initSocketServer = exports.initSocketServer = function initSocketServer(io) 
 
     // 🔹 Ngắt kết nối
     socket.on('disconnect', function () {
+      console.log('❌ Socket disconnected:', socket.id);
       users = users.filter(function (u) {
         return u.id !== socket.id;
       });

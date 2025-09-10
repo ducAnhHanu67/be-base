@@ -26,14 +26,9 @@ var START_SERVER = function START_SERVER() {
     next();
   });
   app.use((0, _cookieParser["default"])());
-  app.use((0, _cors["default"])({
-    origin: ['http://localhost:5173', 'http://localhost:5174'],
-    methods: ['GET', 'POST', 'PUT', 'DELETE'],
-    allowedHeaders: ['Content-Type', 'Authorization'],
-    credentials: true
-  }));
+
   // Handle CORS
-  // app.use(cors(corsOptions))
+  app.use((0, _cors["default"])(_cors2.corsOptions));
 
   // Enable req.body json data
   app.use(_express["default"].json());
@@ -57,12 +52,7 @@ var START_SERVER = function START_SERVER() {
     console.log("3. Hi ".concat(_environment.env.AUTHOR, ", Back-end Server is running successfully at ").concat(_environment.env.APP_HOST, ":").concat(_environment.env.APP_PORT));
   });
 
-  // Thực hiện cleanup trước khi dừng server
-  // exitHook(() => {
-  //   console.log('4. Server is shutting down...')
-  //   CLOSE_DB()
-  //   console.log('5. Disconnected from MySQL')
-  // })
+
 };
 (0, _asyncToGenerator2["default"])(/*#__PURE__*/_regenerator["default"].mark(function _callee() {
   return _regenerator["default"].wrap(function _callee$(_context) {

@@ -10,10 +10,9 @@ var _asyncToGenerator2 = _interopRequireDefault(require("@babel/runtime/helpers/
 var _sequelize = require("sequelize");
 var _environment = require("./environment");
 // Tạo đối tượng Sequelize với cấu hình timezone và chuyển đổi bằng
-var sequelize = new _sequelize.Sequelize(_environment.env.DATABASE_NAME, env.DATABASE_USER, _environment.env.DATABASE_PASSWORD, {
+var sequelize = new _sequelize.Sequelize(_environment.env.DATABASE_NAME, 'root', _environment.env.DATABASE_PASSWORD, {
   host: _environment.env.APP_HOST,
   port: _environment.env.DATABASE_PORT,
-  logging: false,
   dialect: 'mysql',
   timezone: '+07:00',
   dialectOptions: {
