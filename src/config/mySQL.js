@@ -1,19 +1,25 @@
 import { Sequelize } from 'sequelize'
 import { env } from '~/config/environment'
+import fs from 'fs'
+import path from 'path'
 
-
-// Tạo đối tượng Sequelize
+// Tạo đối tượng Sequelize với cấu hình timezone và chuyển đổi bằng
 const sequelize = new Sequelize(
-  'nhrobzuz_robot',
-  'nhrobzuz_robot',
-  'Duc@nh123',
+  process.env.DATABASE_NAME || 'robot', // DB name
+  process.env.DATABASE_USER || 'avnadmin', // user
+  process.env.DATABASE_PASSWORD,
   {
-    host: 'localhost',
-    port: 3306,
-    dialect: 'mysql',
+    host: process.env.DATABASE_HOST || 'mysql-robot-ducanhhanu2020-7612.g.aivencloud.com',
+    port: process.env.DATABASE_PORT || 22381,
     logging: false,
+    dialect: 'mysql',
     timezone: '+07:00',
     dialectOptions: {
+      ssl: {
+        ca: fs.readFileSync(
+          path.join(__dirname, '..', 'certs', 'ca.pem')
+        )
+      },
       dateStrings: true,
       typeCast(field, next) {
         if (field.type === 'DATETIME' || field.type === 'TIMESTAMP') {
@@ -22,19 +28,15 @@ const sequelize = new Sequelize(
         return next()
       }
     }
-  }
-)
+  })
 
 // Hàm kiểm tra kết nối
 export const CONNECT_DB = async () => {
   try {
-    console.log('1. Connecting to MySQL...')
     await sequelize.authenticate()
-    console.log(
-      `2. ✅ Connected to MySQL: db=${env.DATABASE_NAME}, user=${env.DATABASE_USER}, host=${env.DATABASE_HOST}, port=${env.DATABASE_PORT}`
-    )
+    console.log('Connection has been established successfully.')
   } catch (error) {
-    console.error('❌ Unable to connect to the database:', error)
+    console.error('Unable to connect to the database:', error)
   }
 }
 
@@ -46,5 +48,4 @@ export const CLOSE_DB = async () => {
     console.error('Error while closing database connection:', error)
   }
 }
-
 export default sequelize

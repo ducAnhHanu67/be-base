@@ -13,7 +13,7 @@ const Router = express.Router()
 
 // Check API v1/status
 Router.get('/status', (req, res) => {
-  res.status(200).json({ message: 'APIs V1 are ready to use. dau lam day' })
+  res.status(200).json({ message: 'APIs V1 are ready to use.' })
 })
 
 // User API
