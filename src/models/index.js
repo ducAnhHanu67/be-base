@@ -3,8 +3,6 @@ import Category from './Category'
 import FlashSale from './FlashSale'
 import BookGenre from './BookGenre'
 import Product from './Product'
-import BookDetail from './BookDetail'
-import StationeryDetail from './StationeryDetail'
 import ProductImage from './ProductImage'
 import Coupon from './Coupon'
 import User from './User'
@@ -16,6 +14,7 @@ import Review from './Review'
 import Address from './Address'
 import Message from './Message'
 import ProductHighlight from './ProductHighlight'
+import ProductBrand from './ProducBrand'
 
 Category.hasOne(Product, {
   foreignKey: 'categoryId',
@@ -24,16 +23,6 @@ Category.hasOne(Product, {
 Product.belongsTo(Category, {
   foreignKey: 'category_id',
   as: 'category'
-})
-
-// Product ↔ BookDetail (1-1)
-Product.hasOne(BookDetail, {
-  foreignKey: 'productId',
-  as: 'bookDetail' // ← alias phải trùng với include bên dưới
-})
-BookDetail.belongsTo(Product, {
-  foreignKey: 'productId',
-  as: 'product'
 })
 
 // Product ↔ ProductImage (1-n)
@@ -46,23 +35,18 @@ ProductImage.belongsTo(Product, {
   as: 'product'
 })
 
-Product.hasOne(StationeryDetail, {
-  foreignKey: 'productId',
-  as: 'stationeryDetail' // ← alias phải trùng với include bên dưới
-})
-StationeryDetail.belongsTo(Product, {
-  foreignKey: 'productId',
-  as: 'product'
-})
+// Category ↔ Brand (1-n)
+Category.hasMany(ProductBrand, { foreignKey: 'categoryId', as: 'brands' })
+ProductBrand.belongsTo(Category, { foreignKey: 'categoryId', as: 'category' })
 
-// BookGenre ↔ BookDetail (1-n)
-BookGenre.hasMany(BookDetail, {
-  foreignKey: 'bookGenreId',
-  as: 'bookDetails'
+// Brand ↔ Product (1-n)
+ProductBrand.hasMany(Product, {
+  foreignKey: 'brandId',
+  as: 'products'
 })
-BookDetail.belongsTo(BookGenre, {
-  foreignKey: 'bookGenreId',
-  as: 'bookGenre'
+Product.belongsTo(ProductBrand, {
+  foreignKey: 'brandId',
+  as: 'brand'
 })
 
 // User ↔ Cart (1-n)
@@ -192,8 +176,7 @@ export {
   Category,
   BookGenre,
   Product,
-  BookDetail,
-  StationeryDetail,
+  ProductBrand,
   ProductImage,
   Coupon,
   User,

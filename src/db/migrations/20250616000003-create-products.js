@@ -20,6 +20,17 @@ module.exports = {
         onUpdate: 'CASCADE',
         onDelete: 'CASCADE'
       },
+      // thêm brand_id
+      brand_id: {
+        allowNull: false,
+        type: Sequelize.BIGINT,
+        references: {
+          model: 'brands',
+          key: 'id'
+        },
+        onUpdate: 'CASCADE',
+        onDelete: 'CASCADE'
+      },
       name: {
         allowNull: false,
         type: Sequelize.STRING
@@ -49,10 +60,6 @@ module.exports = {
       dimension: {
         allowNull: true,
         type: Sequelize.STRING
-      },
-      type: {
-        allowNull: false,
-        type: Sequelize.ENUM('BOOK', 'STATIONERY')
       },
       created_at: {
         allowNull: false,

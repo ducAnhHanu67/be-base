@@ -290,7 +290,7 @@ const getCartWithItems = async (cartId) => {
             {
               model: Product,
               as: 'product',
-              attributes: ['id', 'name', 'price', 'discount', 'stock', 'coverImageUrl', 'type'],
+              attributes: ['id', 'name', 'price', 'discount', 'stock', 'coverImageUrl'],
               include: [
                 {
                   model: ProductImage,

@@ -23,10 +23,6 @@ const getCoupons = async (queryFilters) => {
       whereClause.isActive = isActive === 'true'
     }
 
-    if (type) {
-      whereClause.type = type
-    }
-
     // Filter for active status - chỉ lấy voucher thực sự có thể sử dụng
     if (status === 'active') {
       whereClause.isActive = true // Voucher phải được active

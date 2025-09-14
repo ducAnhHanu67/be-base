@@ -50,10 +50,10 @@ Product.init(
       allowNull: true,
       type: DataTypes.STRING
     },
-    type: {
+    brandId: {
+      type: DataTypes.BIGINT,
       allowNull: false,
-      type: DataTypes.ENUM('BOOK', 'STATIONERY'),
-      primaryKey: true
+      field: 'brand_id'
     },
     isTrend: {
       type: DataTypes.BOOLEAN,

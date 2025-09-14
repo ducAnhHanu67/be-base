@@ -2,16 +2,12 @@ import express from 'express'
 import path from 'path'
 import { env } from '~/config/environment'
 import cors from 'cors'
-import { corsOptions } from './config/cors'
 import { CONNECT_DB, CLOSE_DB } from '~/config/mySQL'
 import cookieParser from 'cookie-parser'
 import exitHook from 'async-exit-hook'
 import { APIs_V1 } from '~/routes/v1'
 import { errorHandlingMiddleware } from '~/middlewares/errorHandlingMiddleware'
 import http from 'http'
-import { Server } from 'socket.io'
-import { initSocketServer } from '~/sockets'
-
 
 const START_SERVER = () => {
   const app = express()
@@ -46,13 +42,6 @@ const START_SERVER = () => {
   app.use('/images', express.static(path.join(__dirname, '..', 'public', 'images')))
 
   const server = http.createServer(app)
-  const io = new Server(server, {
-    cors: {
-      origin: '*'
-    }
-  })
-
-  initSocketServer(io) // 👉 Gọi logic socket bạn đã viết
 
   server.listen(env.APP_PORT, () => {
     // eslint-disable-next-line no-console

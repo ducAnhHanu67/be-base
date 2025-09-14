@@ -10,23 +10,19 @@ const sequelize = new Sequelize(
   process.env.DATABASE_PASSWORD,
   {
     host: process.env.DATABASE_HOST || 'mysql-robot-ducanhhanu2020-7612.g.aivencloud.com',
-    port: process.env.DATABASE_PORT || 22381,
+    port: process.env.DATABASE_PORT || 3006,
     logging: false,
     dialect: 'mysql',
     timezone: '+07:00',
     dialectOptions: {
-      ssl: {
-        ca: fs.readFileSync(
-          path.join(__dirname, '..', 'certs', 'ca.pem')
-        )
-      },
       dateStrings: true,
       typeCast(field, next) {
         if (field.type === 'DATETIME' || field.type === 'TIMESTAMP') {
           return field.string()
         }
         return next()
-      }
+      },
+      ssl: process.env.DATABASE_SSL === 'true' ? { rejectUnauthorized: true } : false
     }
   })
 

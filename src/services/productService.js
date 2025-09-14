@@ -1,18 +1,22 @@
 import { Sequelize, Op } from 'sequelize'
 import sequelize from '~/config/mySQL'
-import { BookDetail, StationeryDetail, Product, ProductImage, BookGenre, Category, Review, FlashSale } from '~/models'
+import { ProductBrand, Product, ProductImage, BookGenre, Category, Review, FlashSale } from '~/models'
 import ProductHighlight from '~/models/ProductHighlight'
 import { UploadImageProvider } from '~/providers/UploadImageProvider'
 import ApiError from '~/utils/ApiError'
 import { DEFAULT_PAGE, DEFAULT_ITEMS_PER_PAGE } from '~/utils/constants'
 
 const getProducts = async (page, itemsPerPage, queryFilter) => {
+  console.log(page, 'Page');
+
   try {
     if (!page) page = DEFAULT_PAGE
     if (!itemsPerPage) itemsPerPage = DEFAULT_ITEMS_PER_PAGE
 
     const offset = (page - 1) * itemsPerPage
-    const whereClause = queryFilter ? { name: { [Op.like]: `%${queryFilter}%` } } : {}
+    const whereClause = queryFilter
+      ? { name: { [Op.like]: `%${queryFilter}%` } }
+      : {}
 
     const { rows: data, count } = await Product.findAndCountAll({
       where: whereClause,
@@ -29,39 +33,21 @@ const getProducts = async (page, itemsPerPage, queryFilter) => {
         'description',
         'coverImageUrl',
         'dimension',
-        'type',
         'categoryId',
+        'brandId',
         'createdAt',
         'updatedAt'
       ],
 
       include: [
         {
-          model: BookDetail,
-          as: 'bookDetail',
-          required: false,
-          attributes: [
-            'bookGenreId',
-            'author',
-            'translator',
-            'language',
-            'publisher',
-            'publishYear',
-            'pageCount'
-          ],
-          on: Sequelize.literal('Product.id = bookDetail.product_id AND Product.type = "BOOK"')
-        },
-        {
-          model: StationeryDetail,
-          as: 'stationeryDetail',
-          required: false,
-          attributes: ['brand', 'placeProduction', 'color', 'material'],
-          on: Sequelize.literal('Product.id = stationeryDetail.product_id AND Product.type = "STATIONERY"')
-        },
-        {
           model: Category,
           as: 'category',
-          required: false,
+          attributes: ['id', 'name']
+        },
+        {
+          model: ProductBrand,
+          as: 'brand',
           attributes: ['id', 'name']
         },
         {
@@ -83,6 +69,7 @@ const getProducts = async (page, itemsPerPage, queryFilter) => {
     throw error
   }
 }
+
 const getProductSuggest = async (keyword) => {
   try {
     const products = await Product.findAll({
@@ -104,7 +91,7 @@ const getProductsByCategory = async (categoryId, limit = 10) => {
       attributes: [
         'id', 'name', 'price', 'discount', 'stock',
         'description', 'coverImageUrl', 'dimension',
-        'type', 'categoryId', 'createdAt', 'updatedAt'
+        'categoryId', 'createdAt', 'updatedAt'
       ],
       include: [
         { model: Category, as: 'category', attributes: ['id', 'name'] },
@@ -142,16 +129,15 @@ const getFlashSaleProducts = async () => {
             'description',
             'coverImageUrl',
             'dimension',
-            'type',
             'categoryId',
+            'brandId', // ✅ thêm brandId
             'createdAt',
             'updatedAt'
           ],
           include: [
             { model: Category, as: 'category', attributes: ['id', 'name'] },
-            { model: ProductImage, as: 'productImages', required: false },
-            { model: BookDetail, as: 'bookDetail', required: false },
-            { model: StationeryDetail, as: 'stationeryDetail', required: false }
+            { model: ProductBrand, as: 'brand', attributes: ['id', 'name'] },
+            { model: ProductImage, as: 'productImages', required: false }
           ]
         }
       ],
@@ -164,6 +150,7 @@ const getFlashSaleProducts = async () => {
     throw error;
   }
 };
+
 
 
 const getProductById = async (productId) => {
@@ -179,38 +166,20 @@ const getProductById = async (productId) => {
         'description',
         'coverImageUrl',
         'dimension',
-        'type',
         'categoryId',
+        'brandId',
         'createdAt',
         'updatedAt'
       ],
       include: [
         {
-          model: BookDetail,
-          as: 'bookDetail',
-          required: false,
-          attributes: [
-            'bookGenreId',
-            'author',
-            'translator',
-            'language',
-            'publisher',
-            'publishYear',
-            'pageCount'
-          ],
-          on: Sequelize.literal('Product.id = bookDetail.product_id AND Product.type = "BOOK"')
-        },
-        {
-          model: StationeryDetail,
-          as: 'stationeryDetail',
-          required: false,
-          attributes: ['brand', 'placeProduction', 'color', 'material'],
-          on: Sequelize.literal('Product.id = stationeryDetail.product_id AND Product.type = "STATIONERY"')
-        },
-        {
           model: Category,
           as: 'category',
-          required: false,
+          attributes: ['id', 'name']
+        },
+        {
+          model: ProductBrand,
+          as: 'brand',
           attributes: ['id', 'name']
         },
         {
@@ -231,14 +200,15 @@ const getProductById = async (productId) => {
           attributes: ['id', 'key', 'value']
         }
       ],
-      // group: ['Product.id'],
       raw: false
     })
+
     return product
   } catch (error) {
     throw error
   }
 }
+
 
 const create = async (reqBody, productFile) => {
   try {
@@ -276,21 +246,9 @@ const create = async (reqBody, productFile) => {
         description: reqBody.description,
         coverImageUrl: uploadResult.fileUrl,
         dimension: reqBody.dimension,
-        type: reqBody.type,
+        brandId: reqBody.brandId,
         productImages: (reqBody.productImages || []).map((i) => ({ imageUrl: i.imageUrl })),
       }
-
-      if (reqBody.type === 'BOOK') {
-        data.bookDetail = { ...reqBody.bookDetail }
-        include.push({ model: BookDetail, as: 'bookDetail' })
-      }
-
-      if (reqBody.type === 'STATIONERY') {
-        data.stationeryDetail = { ...reqBody.stationeryDetail }
-        include.push({ model: StationeryDetail, as: 'stationeryDetail' })
-      }
-
-
 
       // Tạo sản phẩm chính
       const newProduct = await Product.create(data, { include, transaction: t })
@@ -331,13 +289,12 @@ const create = async (reqBody, productFile) => {
 
 const update = async (productId, reqBody, productFile) => {
   try {
-    // Lấy product cũ
+    // 1. Kiểm tra product cũ
     const oldProduct = await Product.findByPk(productId)
-    if (oldProduct === reqBody) throw new ApiError(404, 'Không tìm thấy sản phẩm!')
     if (!oldProduct) throw new ApiError(404, 'Không tìm thấy sản phẩm!')
 
-    // Xử lý coverImageUrl
-    let coverImageUrl
+    // 2. Xử lý coverImageUrl
+    let coverImageUrl = oldProduct.coverImageUrl
     if (productFile) {
       const uploadResult = await UploadImageProvider.uploadImage(
         productFile.buffer,
@@ -345,145 +302,39 @@ const update = async (productId, reqBody, productFile) => {
         productFile.originalname
       )
       coverImageUrl = uploadResult.fileUrl
-    } else {
-      coverImageUrl = oldProduct.coverImageUrl
     }
 
-    // Nếu type không đổi, chỉ update trong cùng model
-    if (reqBody.type === oldProduct.type) {
-      return await sequelize.transaction(async (t) => {
-        // 1. Cập nhật trường chung
-        await Product.update(
-          {
-            categoryId: reqBody.categoryId,
-            name: reqBody.name,
-            price: reqBody.price,
-            discount: reqBody.discount,
-            stock: reqBody.stock,
-            description: reqBody.description,
-            coverImageUrl: coverImageUrl,
-            dimension: reqBody.dimension,
-            type: reqBody.type
-          },
-          {
-            where: { id: productId },
-            transaction: t
-          }
-        )
+    // 3. Update product (chỉ còn brandId, không còn type/bookDetail/stationeryDetail)
+    await Product.update(
+      {
+        categoryId: reqBody.categoryId,
+        brandId: reqBody.brandId,
+        name: reqBody.name,
+        price: reqBody.price,
+        discount: reqBody.discount,
+        stock: reqBody.stock,
+        description: reqBody.description,
+        coverImageUrl,
+        dimension: reqBody.dimension
+      },
+      {
+        where: { id: productId }
+      }
+    )
 
-        // 2. Cập nhật riêng detail
-        if (reqBody.type === 'BOOK') {
-          await BookDetail.update(
-            {
-              bookGenreId: reqBody.bookDetail.bookGenreId,
-              author: reqBody.bookDetail.author,
-              translator: reqBody.bookDetail.translator,
-              language: reqBody.bookDetail.language,
-              publisher: reqBody.bookDetail.publisher,
-              publishYear: reqBody.bookDetail.publishYear,
-              pageCount: reqBody.bookDetail.pageCount
-            },
-            {
-              where: { productId }, // foreignKey của BookDetail
-              transaction: t
-            }
-          )
-        } else {
-          await StationeryDetail.update(
-            {
-              brand: reqBody.stationeryDetail.brand,
-              placeProduction: reqBody.stationeryDetail.placeProduction,
-              color: reqBody.stationeryDetail.color,
-              material: reqBody.stationeryDetail.material
-            },
-            {
-              where: { productId },
-              transaction: t
-            }
-          )
-        }
-
-        // 3. Trả về đối tượng đầy đủ với include
-        return await Product.findByPk(productId, {
-          include: [
-            { model: BookDetail, as: 'bookDetail' },
-            { model: StationeryDetail, as: 'stationeryDetail' }
-          ],
-          transaction: t
-        })
-      })
-    }
-    // Nếu type thay đổi
-    else {
-      const product = await sequelize.transaction(async (t) => {
-        // 1. Xóa detail cũ
-        if (oldProduct.type === 'BOOK') {
-          await BookDetail.destroy({ where: { productId }, transaction: t })
-        } else if (oldProduct.type === 'STATIONERY') {
-          await StationeryDetail.destroy({ where: { productId }, transaction: t })
-        }
-
-        // 2. Cập nhật phần chung của product
-        await Product.update(
-          {
-            categoryId: reqBody.categoryId,
-            name: reqBody.name,
-            price: reqBody.price,
-            discount: reqBody.discount,
-            stock: reqBody.stock,
-            description: reqBody.description,
-            coverImageUrl,
-            dimension: reqBody.dimension,
-            type: reqBody.type
-          },
-          { where: { id: productId }, transaction: t }
-        )
-
-        // 3. Tạo detail mới tùy theo type mới
-        if (reqBody.type === 'BOOK') {
-          await BookDetail.create(
-            {
-              productId,
-              bookGenreId: reqBody.bookDetail.bookGenreId,
-              author: reqBody.bookDetail.author,
-              translator: reqBody.bookDetail.translator,
-              language: reqBody.bookDetail.language,
-              publisher: reqBody.bookDetail.publisher,
-              publishYear: reqBody.bookDetail.publishYear,
-              pageCount: reqBody.bookDetail.pageCount
-            },
-            { transaction: t }
-          )
-        } else if (reqBody.type === 'STATIONERY') {
-          await StationeryDetail.create(
-            {
-              productId,
-              brand: reqBody.stationeryDetail.brand,
-              placeProduction: reqBody.stationeryDetail.placeProduction,
-              color: reqBody.stationeryDetail.color,
-              material: reqBody.stationeryDetail.material
-            },
-            { transaction: t }
-          )
-        }
-
-        // 4. Trả về object mới với include
-        return Product.findByPk(productId, {
-          include: [
-            { model: ProductImage, as: 'productImages' },
-            { model: BookDetail, as: 'bookDetail' },
-            { model: StationeryDetail, as: 'stationeryDetail' }
-          ],
-          transaction: t
-        })
-      })
-
-      return product
-    }
+    // 4. Trả về product đã update kèm include
+    return await Product.findByPk(productId, {
+      include: [
+        { model: ProductImage, as: 'productImages' },
+        { model: Category, as: 'category', attributes: ['id', 'name'] },
+        { model: ProductBrand, as: 'brand', attributes: ['id', 'name'] }
+      ]
+    })
   } catch (err) {
     throw err
   }
 }
+
 
 const deleteById = async (productId) => {
   // 1. Lấy trước sản phẩm (để biết có tồn tại & nếu cần, trả về dữ liệu cũ)
@@ -496,18 +347,6 @@ const deleteById = async (productId) => {
   await sequelize.transaction(async (t) => {
     // Xóa ảnh liên quan
     await ProductImage.destroy({
-      where: { productId },
-      transaction: t
-    })
-
-    // Xóa chi tiết sách nếu có
-    await BookDetail.destroy({
-      where: { productId },
-      transaction: t
-    })
-
-    // Xóa chi tiết văn phòng phẩm nếu có
-    await StationeryDetail.destroy({
       where: { productId },
       transaction: t
     })
@@ -563,9 +402,7 @@ const searchAndFilterProducts = async (filters) => {
       page = DEFAULT_PAGE,
       itemsPerPage = DEFAULT_ITEMS_PER_PAGE,
       search,
-      type,
-      bookGenreId,
-      language,
+      brandId,        // ✅ thay type/bookGenreId bằng brandId
       categoryId,
       minPrice,
       maxPrice
@@ -581,29 +418,31 @@ const searchAndFilterProducts = async (filters) => {
       whereClause.name = { [Op.like]: `%${search}%` }
     }
 
-    // Filter theo type (BOOK hoặc STATIONERY)
-    if (type) {
-      whereClause.type = type
+    // Filter theo brandId
+    if (brandId) {
+      whereClause.brandId = brandId
     }
 
-    // Filter theo categoryId (cho STATIONERY)
+    // Filter theo categoryId
     if (categoryId) {
       whereClause.categoryId = categoryId
     }
 
+    // Filter theo isTrend
     if (filters.isTrend !== undefined) {
       const trendRaw = filters.isTrend
-      const isTrendBool = trendRaw === '1' || trendRaw === 1 || trendRaw === true || trendRaw === 'true'
+      const isTrendBool =
+        trendRaw === '1' || trendRaw === 1 || trendRaw === true || trendRaw === 'true'
       whereClause.isTrend = isTrendBool
     }
 
-
-    // Filter theo giá - tính theo giá sau discount
-    const hasMinPrice = minPrice !== undefined && minPrice !== null && minPrice !== '' && !isNaN(minPrice)
-    const hasMaxPrice = maxPrice !== undefined && maxPrice !== null && maxPrice !== '' && !isNaN(maxPrice)
+    // Filter theo giá sau discount
+    const hasMinPrice =
+      minPrice !== undefined && minPrice !== null && minPrice !== '' && !isNaN(minPrice)
+    const hasMaxPrice =
+      maxPrice !== undefined && maxPrice !== null && maxPrice !== '' && !isNaN(maxPrice)
 
     if (hasMinPrice || hasMaxPrice) {
-      // Tính giá thực tế sau discount: price * (100 - discount) / 100
       const finalPriceFormula = 'price * (100 - discount) / 100'
 
       if (hasMinPrice && hasMaxPrice) {
@@ -612,9 +451,13 @@ const searchAndFilterProducts = async (filters) => {
           Sequelize.literal(`${finalPriceFormula} <= ${parseFloat(maxPrice)}`)
         ]
       } else if (hasMinPrice) {
-        whereClause[Op.and] = [Sequelize.literal(`${finalPriceFormula} >= ${parseFloat(minPrice)}`)]
+        whereClause[Op.and] = [
+          Sequelize.literal(`${finalPriceFormula} >= ${parseFloat(minPrice)}`)
+        ]
       } else if (hasMaxPrice) {
-        whereClause[Op.and] = [Sequelize.literal(`${finalPriceFormula} <= ${parseFloat(maxPrice)}`)]
+        whereClause[Op.and] = [
+          Sequelize.literal(`${finalPriceFormula} <= ${parseFloat(maxPrice)}`)
+        ]
       }
     }
 
@@ -623,7 +466,11 @@ const searchAndFilterProducts = async (filters) => {
       {
         model: Category,
         as: 'category',
-        required: false,
+        attributes: ['id', 'name']
+      },
+      {
+        model: ProductBrand,
+        as: 'brand',
         attributes: ['id', 'name']
       },
       {
@@ -632,53 +479,6 @@ const searchAndFilterProducts = async (filters) => {
         required: false
       }
     ]
-
-    // Include BookDetail với điều kiện filter
-    const bookDetailInclude = {
-      model: BookDetail,
-      as: 'bookDetail',
-      required: false,
-      attributes: [
-        'bookGenreId',
-        'author',
-        'translator',
-        'language',
-        'publisher',
-        'publishYear',
-        'pageCount'
-      ],
-      include: [
-        {
-          model: BookGenre,
-          as: 'bookGenre',
-          required: false,
-          attributes: ['id', 'name']
-        }
-      ]
-    }
-
-    // Nếu có filter theo bookGenreId hoặc language cho BOOK
-    if (bookGenreId || language) {
-      const bookDetailWhere = {}
-      if (bookGenreId) {
-        bookDetailWhere.bookGenreId = bookGenreId
-      }
-      if (language) {
-        bookDetailWhere.language = { [Op.like]: `%${language}%` }
-      }
-      bookDetailInclude.where = bookDetailWhere
-      bookDetailInclude.required = true // Bắt buộc có BookDetail khi filter
-    }
-
-    includeArray.push(bookDetailInclude)
-
-    // Include StationeryDetail
-    includeArray.push({
-      model: StationeryDetail,
-      as: 'stationeryDetail',
-      required: false,
-      attributes: ['brand', 'placeProduction', 'color', 'material']
-    })
 
     const { rows: data, count } = await Product.findAndCountAll({
       where: whereClause,
@@ -694,13 +494,13 @@ const searchAndFilterProducts = async (filters) => {
         'description',
         'coverImageUrl',
         'dimension',
-        'type',
         'categoryId',
+        'brandId',
         'createdAt',
         'updatedAt'
       ],
       include: includeArray,
-      distinct: true // Tránh duplicate khi có join
+      distinct: true
     })
 
     return { data, count }
@@ -708,6 +508,7 @@ const searchAndFilterProducts = async (filters) => {
     throw error
   }
 }
+
 
 const getTopTrendingProducts = async () => {
   try {
@@ -738,26 +539,6 @@ const getTopTrendingProducts = async () => {
       order: [[Sequelize.literal('soldQuantity'), 'DESC']],
       include: [
         {
-          model: BookDetail,
-          as: 'bookDetail',
-          required: false,
-          attributes: [
-            'bookGenreId',
-            'author',
-            'translator',
-            'language',
-            'publisher',
-            'publishYear',
-            'pageCount'
-          ]
-        },
-        {
-          model: StationeryDetail,
-          as: 'stationeryDetail',
-          required: false,
-          attributes: ['brand', 'placeProduction', 'color', 'material']
-        },
-        {
           model: Category,
           as: 'category',
           required: false,
@@ -769,14 +550,15 @@ const getTopTrendingProducts = async () => {
           required: false
         }
       ]
-    });
+    })
 
-    return products;
+    return products
   } catch (error) {
-    console.error('🔥 Error in getTopTrendingProducts:', error);
-    throw error;
+    console.error('🔥 Error in getTopTrendingProducts:', error)
+    throw error
   }
-};
+}
+
 
 
 
