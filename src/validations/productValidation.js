@@ -4,6 +4,7 @@ import ApiError from '~/utils/ApiError'
 const validate = async (req, res, next) => {
   const productFields = {
     categoryId: Joi.number().required().integer(),
+    brandId: Joi.number().required().integer(),
     name: Joi.string().required().min(3).max(50).trim(),
     price: Joi.number().required().positive(),
     discount: Joi.number().required().min(0).max(100),
@@ -11,7 +12,7 @@ const validate = async (req, res, next) => {
     description: Joi.string().required().min(5).max(10000).trim(),
     // coverImageUrl: Joi.string().uri().required(),
     dimension: Joi.string().allow('').max(50).trim(),
-    type: Joi.string().valid('BOOK', 'STATIONERY').required()
+
 
     // productImages: Joi.array()
     //   .items(Joi.object({ imageUrl: Joi.string().uri().required() }))

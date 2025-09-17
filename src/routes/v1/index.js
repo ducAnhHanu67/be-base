@@ -8,6 +8,7 @@ import { cartRoute } from './cartRoute'
 import { orderRoute } from './orderRoute'
 import { reviewRoute } from './reviewRoute'
 import { addressRoute } from './addressRoute'
+import { brandsRoute } from './brandsRoute'
 
 const Router = express.Router()
 
@@ -22,6 +23,8 @@ Router.use('/users', userRoute)
 Router.use('/categories', categoryRoute)
 
 Router.use('/book-genres', bookGenreRoute)
+
+Router.use('/brands', brandsRoute)
 
 Router.use('/products', productRoute)
 
