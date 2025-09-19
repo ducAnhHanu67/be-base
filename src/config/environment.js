@@ -5,6 +5,7 @@ export const env = {
   DATABASE_PASSWORD: process.env.DATABASE_PASSWORD,
   DATABASE_PORT: process.env.DATABASE_PORT,
   AUTHOR: process.env.AUTHOR,
+  BASE_URL: process.env.BASE_URL,
 
   APP_HOST: process.env.APP_HOST,
   APP_PORT: process.env.APP_PORT,
