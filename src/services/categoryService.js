@@ -5,7 +5,6 @@ import { Op } from 'sequelize'
 import { DEFAULT_PAGE, DEFAULT_ITEMS_PER_PAGE } from '~/utils/constants'
 
 const getCategories = async (page, itemsPerPage, queryFilter) => {
-  console.log(page, 'ab');
 
   try {
     if (!page) page = DEFAULT_PAGE

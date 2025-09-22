@@ -5,11 +5,11 @@ const validate = async (req, res, next) => {
   const productFields = {
     categoryId: Joi.number().required().integer(),
     brandId: Joi.number().required().integer(),
-    name: Joi.string().required().min(3).max(50).trim(),
+    name: Joi.string().required().min(3).max(150).trim(),
     price: Joi.number().required().positive(),
     discount: Joi.number().required().min(0).max(100),
     stock: Joi.number().required().integer().min(0),
-    description: Joi.string().required().min(5).max(10000).trim(),
+    description: Joi.string().required().min(5).max(100000).trim(),
     // coverImageUrl: Joi.string().uri().required(),
     dimension: Joi.string().allow('').max(50).trim(),
 

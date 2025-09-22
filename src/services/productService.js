@@ -1,5 +1,7 @@
 import { Sequelize, Op } from 'sequelize'
 import sequelize from '~/config/mySQL'
+import path from 'path'
+import fs from 'fs'
 import { ProductBrand, Product, ProductImage, BookGenre, Category, Review, FlashSale } from '~/models'
 import ProductHighlight from '~/models/ProductHighlight'
 import { UploadImageProvider } from '~/providers/UploadImageProvider'
@@ -7,7 +9,6 @@ import ApiError from '~/utils/ApiError'
 import { DEFAULT_PAGE, DEFAULT_ITEMS_PER_PAGE } from '~/utils/constants'
 
 const getProducts = async (page, itemsPerPage, queryFilter) => {
-  console.log(page, 'Page');
 
   try {
     if (!page) page = DEFAULT_PAGE
@@ -208,6 +209,9 @@ const getProductById = async (productId) => {
     throw error
   }
 }
+const decodeString = (str) => {
+  return Buffer.from(str, 'latin1').toString('utf8')
+}
 
 
 const create = async (reqBody, productFile) => {
@@ -235,8 +239,13 @@ const create = async (reqBody, productFile) => {
 
       ]
       const highlightEntries = reqBody.highlights
-        ? Object.entries(reqBody.highlights).map(([key, value]) => ({ key, value }))
+        ? Object.entries(reqBody.highlights).map(([key, value]) => ({
+          key: decodeString(key),
+          value: value
+        }))
         : []
+      console.log(highlightEntries, 'Hihi');
+
       const data = {
         categoryId: reqBody.categoryId,
         name: reqBody.name,
@@ -343,9 +352,7 @@ const deleteById = async (productId) => {
     throw new ApiError(404, 'Không tìm thấy sản phẩm!')
   }
 
-  // 2. Xóa trong transaction
   await sequelize.transaction(async (t) => {
-    // Xóa ảnh liên quan
     await ProductImage.destroy({
       where: { productId },
       transaction: t
@@ -362,10 +369,33 @@ const deleteById = async (productId) => {
       throw new ApiError(500, 'Xóa sản phẩm thất bại!')
     }
   })
+  // 6. Xóa file ảnh vật lý trong thư mục public/images/coverImages
+  deleteFileIfExists(product.coverImageUrl)
 
+  if (product.productImages && product.productImages.length > 0) {
+    for (const img of product.productImages) {
+      deleteFileIfExists(img.imageUrl)
+    }
+  }
   // 3. Trả về dữ liệu cũ (nếu cần)
   return product
 }
+function deleteFileIfExists(fileUrl) {
+  if (!fileUrl) return
+
+  const relativePath = fileUrl.replace(/^https?:\/\/[^/]+\//, '')
+
+  const filePath = path.join(__dirname, '../../public', relativePath)
+
+  fs.unlink(filePath, (err) => {
+    if (err) {
+      console.error('⚠️ Không thể xóa file:', filePath, err.message)
+    } else {
+      console.log('✅ Đã xóa file:', filePath)
+    }
+  })
+}
+
 
 const getCategories = async () => {
   try {
