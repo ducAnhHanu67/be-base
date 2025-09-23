@@ -214,7 +214,7 @@ const decodeString = (str) => {
 }
 
 
-const create = async (reqBody, productFile) => {
+const create = async (reqBody, productFile, galleryFiles = []) => {
   try {
     const existProduct = await Product.findOne({
       attributes: ['name'],
@@ -231,6 +231,15 @@ const create = async (reqBody, productFile) => {
       'coverImages',
       productFile.originalname
     )
+    const uploadedGallery = []
+    for (const file of galleryFiles) {
+      const res = await UploadImageProvider.uploadImage(
+        file.buffer,
+        'productImages',
+        file.originalname
+      )
+      uploadedGallery.push({ imageUrl: res.fileUrl })
+    }
 
     const product = await sequelize.transaction(async (t) => {
       const include = [
@@ -244,8 +253,6 @@ const create = async (reqBody, productFile) => {
           value: value
         }))
         : []
-      console.log(highlightEntries, 'Hihi');
-
       const data = {
         categoryId: reqBody.categoryId,
         name: reqBody.name,
@@ -256,7 +263,7 @@ const create = async (reqBody, productFile) => {
         coverImageUrl: uploadResult.fileUrl,
         dimension: reqBody.dimension,
         brandId: reqBody.brandId,
-        productImages: (reqBody.productImages || []).map((i) => ({ imageUrl: i.imageUrl })),
+        productImages: uploadedGallery
       }
 
       // Tạo sản phẩm chính
@@ -312,7 +319,6 @@ const update = async (productId, reqBody, productFile) => {
       )
       coverImageUrl = uploadResult.fileUrl
     }
-
     // 3. Update product (chỉ còn brandId, không còn type/bookDetail/stationeryDetail)
     await Product.update(
       {

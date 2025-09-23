@@ -12,7 +12,10 @@ Router.route('/search').get(productValidation.validateSearch, productController.
 Router.route('/')
   .get(productController.getProducts)
   .post(
-    multerUploadMiddleware.upload.single('coverImageUrl'),
+    multerUploadMiddleware.upload.fields([
+      { name: 'coverImageUrl', maxCount: 1 },
+      { name: 'galleryImages', maxCount: 10 }
+    ]),
     productValidation.validate,
     productController.create
   )

@@ -2,9 +2,12 @@ import { productService } from '~/services/productService'
 
 const create = async (req, res, next) => {
   try {
-    const productFile = req.file
-    const createProduct = await productService.create(req.body, productFile)
-    res.status(201).json(createProduct)
+    const coverFile = req.files['coverImageUrl']?.[0] || null
+    const galleryFiles = req.files['galleryImages'] || []
+
+    const product = await productService.create(req.body, coverFile, galleryFiles)
+
+    res.status(201).json(product)
   } catch (error) {
     next(error)
   }
