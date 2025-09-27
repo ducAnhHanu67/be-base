@@ -81,6 +81,7 @@ const validateSearch = async (req, res, next) => {
       bookGenreId: Joi.number().integer().positive().optional(),
       language: Joi.string().max(100).trim().optional(),
       categoryId: Joi.number().integer().positive().optional(),
+       brandId: Joi.number().integer().positive().optional(),
       minPrice: Joi.number().min(0).optional(),
       maxPrice: Joi.number().positive().optional(),
       isTrend: Joi.boolean().optional()

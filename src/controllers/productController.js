@@ -86,7 +86,9 @@ const searchAndFilterProducts = async (req, res, next) => {
       categoryId: req.query.categoryId,
       minPrice: req.query.minPrice,
       maxPrice: req.query.maxPrice,
-      isTrend: req.query.isTrend
+      isTrend: req.query.isTrend,
+      brandId:req.query.brandId
+
     }
 
     const products = await productService.searchAndFilterProducts(filters)

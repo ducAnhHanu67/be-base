@@ -507,7 +507,7 @@ const searchAndFilterProducts = async (filters) => {
       {
         model: ProductBrand,
         as: 'brand',
-        attributes: ['id', 'name']
+        attributes: ['id', 'name','categoryId']
       },
       {
         model: ProductImage,
